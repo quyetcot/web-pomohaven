@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Performance Analytics - PomoTune</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-variant": "#32353c",
+                        "primary": "#adc6ff",
+                        "primary-container": "#4b8eff",
+                        "on-tertiary-fixed": "#351000",
+                        "tertiary-fixed": "#ffdbcc",
+                        "surface-container-highest": "#32353c",
+                        "on-tertiary-fixed-variant": "#7c2e00",
+                        "on-primary-container": "#00285c",
+                        "outline-variant": "#414755",
+                        "on-tertiary-container": "#4c1a00",
+                        "outline": "#8b90a0",
+                        "on-primary-fixed-variant": "#004493",
+                        "surface-container": "#1d2026",
+                        "on-secondary": "#082f65",
+                        "tertiary": "#ffb595",
+                        "secondary-fixed": "#d8e2ff",
+                        "on-surface-variant": "#c1c6d7",
+                        "on-background": "#e1e2eb",
+                        "surface-container-low": "#191c22",
+                        "on-tertiary": "#571e00",
+                        "tertiary-fixed-dim": "#ffb595",
+                        "surface-tint": "#adc6ff",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "on-primary": "#002e69",
+                        "inverse-primary": "#005bc1",
+                        "on-error": "#690005",
+                        "error": "#ffb4ab",
+                        "surface-dim": "#10131a",
+                        "surface-container-lowest": "#0b0e14",
+                        "secondary": "#adc6ff",
+                        "inverse-on-surface": "#2e3037",
+                        "on-error-container": "#ffdad6",
+                        "inverse-surface": "#e1e2eb",
+                        "secondary-container": "#26467d",
+                        "background": "#10131a",
+                        "surface-bright": "#363940",
+                        "on-surface": "#e1e2eb",
+                        "on-primary-fixed": "#001a41",
+                        "error-container": "#93000a",
+                        "surface": "#10131a",
+                        "tertiary-container": "#ef6719",
+                        "on-secondary-fixed": "#001a41",
+                        "surface-container-high": "#272a31",
+                        "primary-fixed-dim": "#adc6ff",
+                        "primary-fixed": "#d8e2ff",
+                        "on-secondary-fixed-variant": "#26467d",
+                        "on-secondary-container": "#98b5f3"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(29, 32, 38, 0.6);
+            backdrop-filter: blur(20px);
+            position: relative;
+        }
+        .glass-panel::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            padding: 1px;
+            border-radius: inherit;
+            background: linear-gradient(135deg, rgba(173, 198, 255, 0.15), transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body min-h-screen overflow-x-hidden">
+<!-- TopAppBar Navigation -->
+<header class="fixed top-0 left-0 w-full z-50 bg-[#10131a] shadow-[0_40px_40px_rgba(173,198,255,0.06)] flex justify-between items-center px-8 py-4">
+<div class="text-2xl font-bold tracking-tighter text-[#adc6ff] font-headline">PomoTune</div>
+<div class="hidden md:flex items-center space-x-12">
+<nav class="flex items-center space-x-8">
+<a class="text-[#c1c6d7] opacity-70 hover:text-[#adc6ff] transition-colors duration-300 font-['Inter'] font-semibold tracking-tight" href="demo.html">Dashboard</a>
+<a class="text-[#c1c6d7] opacity-70 hover:text-[#adc6ff] transition-colors duration-300 font-['Inter'] font-semibold tracking-tight" href="demo.html">Sessions</a>
+<a class="text-[#c1c6d7] opacity-70 hover:text-[#adc6ff] transition-colors duration-300 font-['Inter'] font-semibold tracking-tight" href="library.html">Sanctuary</a>
+<a class="text-[#adc6ff] font-semibold font-['Inter'] tracking-tight" href="analytics.html">Analytics</a>
+</nav>
+<div class="flex items-center space-x-6 border-l border-outline-variant pl-8">
+<button class="active:scale-95 transition-transform text-[#c1c6d7] hover:text-[#adc6ff]">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<a href="settings.html" class="active:scale-95 transition-transform text-[#c1c6d7] hover:text-[#adc6ff]">
+<span class="material-symbols-outlined">settings</span>
+</a>
+<a href="auth.html" class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="User profile avatar circle crop" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1ETQH2ba6gTTXER4_NzGpD0Nhm3NC1g5Axe_B7Lr6jo8eG3TsX0h0mKbzswYwrViziVCMaJ_GW0B5nyUqMwSLEVI085iItTPgOjsjRy-ZoJL5emPgNO1lZz-MvGi3mip1CVYSdKZpVm7tRtsr3evVU3fQwYIvw1ADgXxyuOTIYcaRmpT6BlMAcQ2cyT555vlWg0sxHKzsJSQ6pHiCkeGGPPPWf6tiwh7AYw_9U_Lcllnyi66APSDPYU7O16ppKsTRqMZ_TBz0R5gN"/>
+</a>
+</div>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="hidden md:flex h-screen w-64 fixed left-0 top-0 bg-[#10131a] flex-col py-8 px-4 z-40 mt-16">
+<div class="mb-12 px-4">
+<h2 class="text-xl font-bold text-[#adc6ff]">PomoTune</h2>
+<p class="text-[11px] font-medium uppercase tracking-[0.1em] text-[#c1c6d7] opacity-60">Deep Focus Sanctuary</p>
+</div>
+<nav class="flex-grow space-y-2">
+<a class="flex items-center px-4 py-3 rounded-lg text-[#c1c6d7] opacity-60 hover:bg-[#191c22] hover:text-[#adc6ff] hover:translate-x-1 transition-all duration-200 group" href="demo.html">
+<span class="material-symbols-outlined mr-3">dashboard</span>
+<span class="font-['Inter'] uppercase tracking-[0.1em] text-[11px] font-medium">Dashboard</span>
+</a>
+<a class="flex items-center px-4 py-3 rounded-lg text-[#c1c6d7] opacity-60 hover:bg-[#191c22] hover:text-[#adc6ff] hover:translate-x-1 transition-all duration-200 group" href="demo.html">
+<span class="material-symbols-outlined mr-3">timer</span>
+<span class="font-['Inter'] uppercase tracking-[0.1em] text-[11px] font-medium">Sessions</span>
+</a>
+<a class="flex items-center px-4 py-3 rounded-lg text-[#c1c6d7] opacity-60 hover:bg-[#191c22] hover:text-[#adc6ff] hover:translate-x-1 transition-all duration-200 group" href="library.html">
+<span class="material-symbols-outlined mr-3">library_music</span>
+<span class="font-['Inter'] uppercase tracking-[0.1em] text-[11px] font-medium">Audio Sanctuary</span>
+</a>
+<a class="flex items-center px-4 py-3 rounded-lg text-[#adc6ff] font-bold border-r-2 border-[#adc6ff] bg-[#191c22] translate-x-1 transition-all duration-200" href="analytics.html">
+<span class="material-symbols-outlined mr-3">insert_chart</span>
+<span class="font-['Inter'] uppercase tracking-[0.1em] text-[11px] font-medium">Performance Analytics</span>
+</a>
+</nav>
+<div class="mt-auto space-y-2 border-t border-outline-variant pt-6">
+<a class="flex items-center px-4 py-3 rounded-lg text-[#c1c6d7] opacity-60 hover:bg-[#191c22] hover:text-[#adc6ff] transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3">help_outline</span>
+<span class="font-['Inter'] uppercase tracking-[0.1em] text-[11px] font-medium">Support</span>
+</a>
+<a class="flex items-center px-4 py-3 rounded-lg text-[#c1c6d7] opacity-60 hover:bg-[#191c22] hover:text-[#adc6ff] transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3">logout</span>
+<span class="font-['Inter'] uppercase tracking-[0.1em] text-[11px] font-medium">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="pt-24 pb-12 px-6 md:pl-72 md:pr-12 min-h-screen">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+<div>
+<span class="text-[0.6875rem] uppercase tracking-[0.1em] text-on-surface-variant font-medium">Performance Metrics</span>
+<h1 class="text-3xl md:text-4xl font-semibold tracking-tight text-on-surface mt-1">Focus Analytics</h1>
+</div>
+<!-- Toggle Switch -->
+<div class="bg-surface-container-low p-1.5 rounded-full flex items-center shadow-lg">
+<button class="px-6 py-2 rounded-full text-[11px] font-bold uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors">Daily</button>
+<button class="px-6 py-2 rounded-full text-[11px] font-bold uppercase tracking-wider bg-primary-container text-on-primary-container">Weekly</button>
+<button class="px-6 py-2 rounded-full text-[11px] font-bold uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors">Monthly</button>
+</div>
+</div>
+<!-- Stats Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<!-- Total Focus Time -->
+<div class="glass-panel rounded-xl p-8 flex flex-col justify-between overflow-hidden group">
+<div class="flex items-center justify-between mb-4">
+<span class="text-[0.6875rem] uppercase tracking-[0.1em] text-on-surface-variant font-medium">Total Focus Time</span>
+<span class="material-symbols-outlined text-primary">schedule</span>
+</div>
+<div>
+<span class="text-5xl font-semibold tracking-tighter text-on-surface">42.5</span>
+<span class="text-lg text-on-surface-variant ml-2">hrs</span>
+</div>
+<div class="mt-6 flex items-center text-xs text-primary font-medium">
+<span class="material-symbols-outlined text-sm mr-1">trending_up</span>
+<span>+12% from last week</span>
+</div>
+<div class="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors"></div>
+</div>
+<!-- Sessions Completed -->
+<div class="glass-panel rounded-xl p-8 flex flex-col justify-between overflow-hidden group">
+<div class="flex items-center justify-between mb-4">
+<span class="text-[0.6875rem] uppercase tracking-[0.1em] text-on-surface-variant font-medium">Sessions Completed</span>
+<span class="material-symbols-outlined text-primary">task_alt</span>
+</div>
+<div>
+<span class="text-5xl font-semibold tracking-tighter text-on-surface">102</span>
+</div>
+<div class="mt-6 flex items-center text-xs text-primary font-medium">
+<span class="material-symbols-outlined text-sm mr-1">verified</span>
+<span>Daily streak: 14 days</span>
+</div>
+<div class="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors"></div>
+</div>
+<!-- Most Listened -->
+<div class="glass-panel rounded-xl p-8 flex flex-col justify-between overflow-hidden group">
+<div class="flex items-center justify-between mb-4">
+<span class="text-[0.6875rem] uppercase tracking-[0.1em] text-on-surface-variant font-medium">Aural Sanctuary</span>
+<span class="material-symbols-outlined text-primary">equalizer</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 rounded-lg bg-surface-container-high overflow-hidden shadow-inner">
+<img class="w-full h-full object-cover" data-alt="Lofi album cover artistic girl aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKnJgj0oPe69mf6cw3pszZ3edYop0h9rCPPlds_XVzy-X7k1vjVfqAJvjz60Ab_qLwYCWCBCYmz9Mom5B7zE6D2RhQSmtH3aJBz2AQXEYzAgGbuzXZdU6ZG8NdOkXfDDxHLcC02P-FGyyFtcu32lAz2BmmLDHUWLLgwzWCxeRDWP1Y17L0Ge7EOTBAnpj-jyPdUrxFZ3Y_kLR6WJDcCso21Dromci_NxYhoYy-8PD64rZw2NRMe7Op_Kmk3lLPbfejaRNYG9Gp76ga"/>
+</div>
+<div>
+<span class="block text-lg font-semibold text-on-surface">Lofi Girl</span>
+<span class="text-xs text-on-surface-variant">Midnight Beats Collection</span>
+</div>
+</div>
+<div class="mt-6 flex items-center text-xs text-on-surface-variant">
+<span>18.4 hours playback</span>
+</div>
+<div class="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors"></div>
+</div>
+</div>
+<!-- Charts Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Weekly Productivity Bar Chart -->
+<div class="lg:col-span-2 glass-panel rounded-xl p-8">
+<div class="flex items-center justify-between mb-10">
+<div>
+<h3 class="text-lg font-semibold text-on-surface">Weekly Productivity</h3>
+<p class="text-xs text-on-surface-variant">Focus distribution across the last 7 days</p>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-primary-container"></div>
+<span class="text-[10px] uppercase tracking-widest text-on-surface-variant">Focus Hours</span>
+</div>
+</div>
+<div class="flex items-end justify-between h-64 w-full gap-4">
+<div class="flex-1 flex flex-col items-center group">
+<div class="w-full bg-surface-container-highest rounded-t-lg relative h-48">
+<div class="absolute bottom-0 left-0 w-full bg-primary-container/40 rounded-t-lg transition-all h-[40%] group-hover:bg-primary-container/60"></div>
+</div>
+<span class="mt-4 text-[10px] uppercase tracking-widest text-on-surface-variant">Mon</span>
+</div>
+<div class="flex-1 flex flex-col items-center group">
+<div class="w-full bg-surface-container-highest rounded-t-lg relative h-48">
+<div class="absolute bottom-0 left-0 w-full bg-primary-container/40 rounded-t-lg transition-all h-[65%] group-hover:bg-primary-container/60"></div>
+</div>
+<span class="mt-4 text-[10px] uppercase tracking-widest text-on-surface-variant">Tue</span>
+</div>
+<div class="flex-1 flex flex-col items-center group">
+<div class="w-full bg-surface-container-highest rounded-t-lg relative h-48">
+<div class="absolute bottom-0 left-0 w-full bg-primary-container/40 rounded-t-lg transition-all h-[85%] group-hover:bg-primary-container/60"></div>
+</div>
+<span class="mt-4 text-[10px] uppercase tracking-widest text-on-surface-variant">Wed</span>
+</div>
+<div class="flex-1 flex flex-col items-center group">
+<div class="w-full bg-surface-container-highest rounded-t-lg relative h-48">
+<div class="absolute bottom-0 left-0 w-full bg-primary-container/40 rounded-t-lg transition-all h-[95%] group-hover:bg-primary-container/60"></div>
+</div>
+<span class="mt-4 text-[10px] uppercase tracking-widest text-on-surface-variant">Thu</span>
+</div>
+<div class="flex-1 flex flex-col items-center group">
+<div class="w-full bg-surface-container-highest rounded-t-lg relative h-48">
+<div class="absolute bottom-0 left-0 w-full bg-primary-container/40 rounded-t-lg transition-all h-[55%] group-hover:bg-primary-container/60"></div>
+</div>
+<span class="mt-4 text-[10px] uppercase tracking-widest text-on-surface-variant">Fri</span>
+</div>
+<div class="flex-1 flex flex-col items-center group">
+<div class="w-full bg-surface-container-highest rounded-t-lg relative h-48">
+<div class="absolute bottom-0 left-0 w-full bg-primary-container/40 rounded-t-lg transition-all h-[30%] group-hover:bg-primary-container/60"></div>
+</div>
+<span class="mt-4 text-[10px] uppercase tracking-widest text-on-surface-variant">Sat</span>
+</div>
+<div class="flex-1 flex flex-col items-center group">
+<div class="w-full bg-surface-container-highest rounded-t-lg relative h-48">
+<div class="absolute bottom-0 left-0 w-full bg-primary-container/40 rounded-t-lg transition-all h-[20%] group-hover:bg-primary-container/60"></div>
+</div>
+<span class="mt-4 text-[10px] uppercase tracking-widest text-on-surface-variant">Sun</span>
+</div>
+</div>
+</div>
+<!-- Focus Breakdown Ring Chart -->
+<div class="glass-panel rounded-xl p-8 flex flex-col items-center text-center">
+<div class="w-full text-left mb-6">
+<h3 class="text-lg font-semibold text-on-surface">Focus Ratio</h3>
+<p class="text-xs text-on-surface-variant">Work vs Rest balance</p>
+</div>
+<div class="relative w-48 h-48 mb-8">
+<!-- Ring Path Background -->
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-surface-container-highest" cx="96" cy="96" fill="transparent" r="80" stroke="currentColor" stroke-width="12"></circle>
+<!-- Focus Segment -->
+<circle class="text-primary-container" cx="96" cy="96" fill="transparent" r="80" stroke="currentColor" stroke-dasharray="502" stroke-dashoffset="125" stroke-linecap="round" stroke-width="12"></circle>
+<!-- Break Segment -->
+<circle class="text-tertiary" cx="96" cy="96" fill="transparent" r="80" stroke="currentColor" stroke-dasharray="502" stroke-dashoffset="400" stroke-linecap="round" stroke-width="12"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-3xl font-bold text-on-surface">75%</span>
+<span class="text-[10px] uppercase tracking-widest text-on-surface-variant">Focus Rate</span>
+</div>
+</div>
+<div class="w-full space-y-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-primary-container"></div>
+<span class="text-xs text-on-surface-variant">Focus Sessions</span>
+</div>
+<span class="text-sm font-semibold text-on-surface">76 sessions</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-tertiary"></div>
+<span class="text-xs text-on-surface-variant">Break Periods</span>
+</div>
+<span class="text-sm font-semibold text-on-surface">26 sessions</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Focus Consistency Heatmap -->
+<div class="mt-8 glass-panel rounded-xl p-8">
+<div class="flex items-center justify-between mb-8">
+<div>
+<h3 class="text-lg font-semibold text-on-surface">Consistency Map</h3>
+<p class="text-xs text-on-surface-variant">Activity intensity over the last month</p>
+</div>
+<div class="flex items-center gap-2 text-[10px] text-on-surface-variant uppercase tracking-widest">
+<span>Less</span>
+<div class="w-3 h-3 rounded-sm bg-surface-container-highest"></div>
+<div class="w-3 h-3 rounded-sm bg-primary-container/20"></div>
+<div class="w-3 h-3 rounded-sm bg-primary-container/50"></div>
+<div class="w-3 h-3 rounded-sm bg-primary-container/80"></div>
+<div class="w-3 h-3 rounded-sm bg-primary-container"></div>
+<span>More</span>
+</div>
+</div>
+<div class="overflow-x-auto no-scrollbar">
+<div class="flex gap-1.5 min-w-max pb-4">
+<!-- Generating a month-ish of heatmap squares (30 days) -->
+<!-- Week 1 -->
+<div class="grid grid-rows-7 gap-1.5">
+<div class="w-5 h-5 rounded-sm bg-primary-container"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container/80"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container/50"></div>
+<div class="w-5 h-5 rounded-sm bg-surface-container-highest"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container/20"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container/80"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container"></div>
+</div>
+<!-- Week 2 -->
+<div class="grid grid-rows-7 gap-1.5">
+<div class="w-5 h-5 rounded-sm bg-primary-container/50"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container/80"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container/80"></div>
+<div class="w-5 h-5 rounded-sm bg-surface-container-highest"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container/50"></div>
+</div>
+<!-- Week 3 -->
+<div class="grid grid-rows-7 gap-1.5">
+<div class="w-5 h-5 rounded-sm bg-primary-container"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container/80"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container/50"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container/20"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container"></div>
+</div>
+<!-- Week 4 -->
+<div class="grid grid-rows-7 gap-1.5">
+<div class="w-5 h-5 rounded-sm bg-surface-container-highest"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container/20"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container/50"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container/80"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container"></div>
+</div>
+<!-- Week 5 -->
+<div class="grid grid-rows-7 gap-1.5">
+<div class="w-5 h-5 rounded-sm bg-primary-container/80"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container/50"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container/20"></div>
+<div class="w-5 h-5 rounded-sm bg-surface-container-highest"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container/50"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container/80"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container"></div>
+</div>
+<!-- Repeated pattern for visualization -->
+<div class="grid grid-rows-7 gap-1.5">
+<div class="w-5 h-5 rounded-sm bg-primary-container"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container/80"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container/50"></div>
+<div class="w-5 h-5 rounded-sm bg-surface-container-highest"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container/20"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container/80"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container"></div>
+</div>
+<div class="grid grid-rows-7 gap-1.5">
+<div class="w-5 h-5 rounded-sm bg-primary-container/50"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container/80"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container/80"></div>
+<div class="w-5 h-5 rounded-sm bg-surface-container-highest"></div>
+<div class="w-5 h-5 rounded-sm bg-primary-container/50"></div>
+</div>
+</div>
+</div>
+<div class="mt-4 flex gap-4 text-[10px] uppercase tracking-widest text-on-surface-variant/60 font-medium">
+<span>Last updated 5 mins ago</span>
+<span>•</span>
+<span>Session intensity: High</span>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Mobile -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full bg-surface-container-low border-t border-outline-variant grid grid-cols-4 py-3 z-50">
+<a href="demo.html" class="flex flex-col items-center gap-1 text-on-surface-variant opacity-70">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[9px] uppercase font-bold tracking-tighter">Dash</span>
+</a>
+<a href="demo.html" class="flex flex-col items-center gap-1 text-on-surface-variant opacity-70">
+<span class="material-symbols-outlined">timer</span>
+<span class="text-[9px] uppercase font-bold tracking-tighter">Sessions</span>
+</a>
+<a href="library.html" class="flex flex-col items-center gap-1 text-on-surface-variant opacity-70">
+<span class="material-symbols-outlined">library_music</span>
+<span class="text-[9px] uppercase font-bold tracking-tighter">Sanctuary</span>
+</a>
+<a href="analytics.html" class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined">insert_chart</span>
+<span class="text-[9px] uppercase font-bold tracking-tighter">Analytics</span>
+</a>
+</nav>
+</body></html>
