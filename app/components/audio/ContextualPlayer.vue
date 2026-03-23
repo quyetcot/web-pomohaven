@@ -1,7 +1,14 @@
 <template>
-  <div class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-4xl z-[100] bg-surface-container/80 backdrop-blur-3xl ghost-border rounded-full px-6 py-3 flex items-center gap-6 shadow-2xl transition-all duration-500" :class="store.isPlayerVisible ? 'translate-y-0 opacity-100' : 'translate-y-24 opacity-0 pointer-events-none'">
+  <div 
+    ref="playerRef"
+    class="fixed z-[100] bg-surface-container/80 backdrop-blur-3xl ghost-border rounded-full px-6 py-3 flex items-center gap-6 shadow-2xl transition-opacity duration-500 select-none group/player touch-none"
+    :class="store.isPlayerVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'"
+    :style="playerStyle"
+  >
+    <!-- Drag Handle Indicator -->
+    <div class="absolute -top-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-primary/20 rounded-full opacity-0 group-hover/player:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"></div>
     
-    <div class="flex items-center gap-4 border-r border-muted/20 pr-6">
+    <div class="flex items-center gap-4 border-r border-muted/20 pr-6 cursor-grab active:cursor-grabbing">
       <div class="w-10 h-10 rounded-lg overflow-hidden shrink-0 relative group">
         <div class="absolute inset-0 bg-void/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
           <span class="material-symbols-outlined text-white text-sm">open_in_full</span>
@@ -15,7 +22,7 @@
     </div>
     
     <!-- Controls -->
-    <div class="flex items-center gap-4">
+    <div class="flex items-center gap-4" @pointerdown.stop>
       <button @click="store.togglePlay()" class="w-10 h-10 rounded-full bg-primary-glow flex items-center justify-center text-void shadow-[0_0_15px_rgba(75,142,255,0.4)] transition-transform hover:scale-105 active:scale-90">
         <span class="material-symbols-outlined font-bold">{{ store.isPlaying ? 'pause' : 'play_arrow' }}</span>
       </button>
@@ -31,7 +38,7 @@
     </div>
     
     <!-- Volume Control -->
-    <div class="flex items-center gap-4 pl-4 border-l border-muted/20 relative group/vol">
+    <div class="flex items-center gap-4 pl-4 border-l border-muted/20 relative group/vol" @pointerdown.stop>
       <!-- Volume Slider Popover (Horizontal) with invisible hover bridge -->
       <div class="absolute bottom-full right-0 pb-4 opacity-0 group-hover/vol:opacity-100 pointer-events-none group-hover/vol:pointer-events-auto transition-all origin-bottom-right z-50">
         <div class="bg-surface-container/90 backdrop-blur-3xl px-4 py-3 rounded-2xl ghost-border w-48 flex flex-col gap-2 shadow-2xl">
@@ -60,11 +67,40 @@
 </template>
 
 <script setup>
-import { onMounted, watch, ref } from 'vue'
+import { onMounted, watch, ref, computed } from 'vue'
+import { useDraggable } from '@vueuse/core'
 import { useAudioStore } from '~/stores/useAudioStore'
 
 const store = useAudioStore()
+const playerRef = ref(null)
 let ytPlayer = null
+
+// useDraggable from VueUse
+const { x, y } = useDraggable(playerRef, {
+  initialValue: { x: 400, y: 800 },
+  preventDefault: true,
+  onStart: (_, event) => {
+    // Nếu chạm vào thanh trượt (input), nút bấm (button) hoặc link (a) thì KHÔNG cho kéo player
+    const target = event.target
+    if (target.closest('input, button, a')) return false
+  }
+})
+
+onMounted(() => {
+  // Khi đã vào trình duyệt (onMounted), ta mới set vị trí đẹp chuẩn tâm màn hình
+  if (window) {
+    x.value = window.innerWidth / 2 - 250
+    y.value = window.innerHeight - 100
+  }
+})
+
+// Mix style của draggable vào background style
+const playerStyle = computed(() => ({
+  left: `${x.value}px`,
+  top: `${y.value}px`,
+  // Nếu đang ẩn thì ko cho kéo vô định
+  transform: store.isPlayerVisible ? 'none' : 'translateY(100px)'
+}))
 
 const currentTitle = ref("Loading Audio...")
 const currentAuthor = ref("Aural Sanctuary")
