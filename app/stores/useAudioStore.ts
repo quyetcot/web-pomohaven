@@ -4,7 +4,7 @@ import { useLocalStorage } from '@vueuse/core'
 
 export const useAudioStore = defineStore('audio', () => {
   // Persisted settings
-  const settings = useLocalStorage('pomotune_audio_v1', {
+  const settings = useLocalStorage('pomohaven_audio_v1', {
     defaultVideoId: 'jfKfPfyJRdk', // Lofi Girl fallback
     defaultVolume: 100,
     autoPlayFocus: false,

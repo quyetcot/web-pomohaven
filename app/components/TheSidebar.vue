@@ -1,8 +1,8 @@
 <template>
   <aside class="hidden md:flex fixed left-0 h-full w-64 bg-surface/60 backdrop-blur-2xl flex-col py-8 gap-6 border-r border-primary-glow/15 z-40 pt-24">
     <div class="px-8 mb-4">
-      <div class="text-xl font-bold text-primary">PomoTune</div>
-      <div class="text-[0.6875rem] uppercase tracking-widest text-muted opacity-70">Deep Focus Sanctuary</div>
+      <div class="text-xl font-bold text-primary">PomoHaven</div>
+      <div class="text-[0.6875rem] uppercase tracking-widest text-muted opacity-70">The Deep Focus Sanctuary</div>
     </div>
     
     <nav class="flex flex-col gap-1">

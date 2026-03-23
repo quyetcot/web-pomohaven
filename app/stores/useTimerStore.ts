@@ -6,7 +6,7 @@ type TimerMode = 'focus' | 'shortBreak' | 'longBreak'
 
 export const useTimerStore = defineStore('timer', () => {
   // Settings (Persisted)
-  const settings = useLocalStorage('pomotune_settings_v1', {
+  const settings = useLocalStorage('pomohaven_settings_v1', {
     focusDuration: 50 * 60,       // 50 minutes
     shortBreakDuration: 10 * 60,   // 10 minutes
     longBreakDuration: 15 * 60,   // 15 minutes
