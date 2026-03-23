@@ -1,90 +1,102 @@
-# Software Requirements Specification (SRS) - PomoTune
+# Software Requirements Specification (SRS)
 
-## Project: PomoTune - The Deep Focus Sanctuary
+## Project: PomoHaven — The Deep Focus Sanctuary
+**Version:** 4.0 (Production Ready)  
+**Status:** Frontend Completed / Backend Integration Pending
 
 ---
 
 ## 1. Tổng quan dự án (Project Overview)
 
-- **Tên dự án:** PomoTune (Tên mã: The Deep Focus Sanctuary).
-- **Mục tiêu:** Tạo ra một không gian làm việc tập trung trên trình duyệt, kết hợp phương pháp Pomodoro với âm nhạc từ YouTube và âm thanh môi trường để tối ưu hóa năng suất.
-- **Giá trị cốt lõi:** Đơn giản - Tập trung - Cá nhân hóa dữ liệu - Trải nghiệm cao cấp.
-- **Slogan:** "Quiet the noise, find your rhythm."
+### 1.1. Mục tiêu
+Tạo ra một hệ sinh thái làm việc tập trung (Deep Work Sanctuary). Hệ thống kết hợp giữa phương pháp Pomodoro khoa học và môi trường âm thanh (YouTube Music + Ambient Sounds) giúp người dùng đạt trạng thái "Flow" nhanh nhất.
+
+### 1.2. Giá trị cốt lỗi
+- **Esthetics:** Theo đuổi thiết kế Glassmorphism và chuyển cảnh mượt mà.
+- **Precision:** Bộ đếm giờ hoạt động chính xác tuyệt đối ngay cả khi tab bị ẩn.
+- **Portability:** Đồng bộ hóa cấu hình và lịch sử phiên trên mọi thiết bị thông qua Backend.
 
 ---
 
-## 2. Đối tượng người dùng (User Personas)
+## 2. Đặc tả chức năng (Functional Specifications)
 
-- **Học sinh, sinh viên:** Cần môi trường học tập không xao nhãng.
-- **Lập trình viên, người làm việc tự do (Freelancer):** Muốn quản lý thời gian và theo dõi hiệu suất làm việc.
+### 2.1. Focus Dashboard
+- **Signature Timer Orb:** Hiển thị vòng tiến độ động (Dynamic Progress Ring). Hỗ trợ 3 chế độ: 
+  - `Focus` (50 phút)
+  - `Short Break` (10 phút)
+  - `Long Break` (15 phút)
+- **Session Control:** Tự động chuyển đổi chế độ (Auto-start) dựa trên thiết lập người dùng.
 
----
+### 2.2. Audio Sanctuary
+- **Hybrid Audio Engine:** Kết hợp YouTube Iframe API với HTML5 Audio cho âm thanh môi trường.
+- **Persistence:** Ghi nhớ URL bài hát và âm lượng gần nhất vào hồ sơ người dùng.
+- **Controls:** Thanh mini-player điều khiển xuyên suốt các trang (Contextual Player).
 
-## 3. Yêu cầu chức năng (Functional Requirements)
-
-### 3.1. Focus Dashboard (Trang điều khiển chính)
-
-- **Signature Focus Orb:** Bộ đếm thời gian dạng vòng tròn (Orb) với hiệu ứng Glassmorphism và vòng tiến độ (Progress ring) biến đổi theo thời gian thực.
-- **Mode Selector:** Chuyển đổi linh hoạt giữa 3 chế độ: **Focus**, **Short Break**, **Long Break**.
-- **Interactive Controls:** Điều khiển Start, Pause, Skip, và Reset phiên tập trung.
-- **Daily Goals Widget:** Theo dõi tiến độ mục tiêu phiên tập trung trong ngày (ví dụ: 6/8 Sessions).
-- **Focus Quote:** Hiển thị danh ngôn truyền cảm hứng thay đổi ngẫu nhiên.
-
-### 3.2. Audio Sanctuary (Hệ thống âm thanh)
-
-- **YouTube Seamless Integration:** Trình phát YouTube tích hợp hỗ trợ tìm kiếm trực tiếp và dán URL.
-- **Ambient Mood Sliders:** Slider điều chỉnh âm thanh môi trường (như Rain, Wind, Cafe) độc lập với nhạc YouTube.
-- **Smart Playlists:** Lưu trữ và hiển thị các Card playlist trực quan (Techno, Lofi, Nature).
-- **Contextual Player:** Thanh mini-player điều khiển nhanh cố định (Sticky Bottom) hiển thị trạng thái phát và tiến độ phiên tập trung.
-- **Smart Recommendations:** Đề xuất nhạc dựa trên lịch sử tập trung của người dùng.
-
-### 3.3. Performance Analytics (Trang thống kê & Phân tích)
-
-- **Metrics Bento Grid:** Hiển thị các chỉ số hiệu suất chính:
-  - Total Focus Time (Giờ).
-  - Sessions Completed (Số phiên).
-  - Most Listened track/category (Dòng nhạc nghe nhiều nhất).
-- **Weekly Productivity Chart:** Biểu đồ cột thể hiện mức độ tập trung trong tuần.
-- **Focus Ratio:** Biểu đồ vòng cung so sánh tỷ lệ giữa Work (Làm việc) và Rest (Nghỉ ngơi/Break).
-- **Consistency Map:** Heat-map hiển thị tần suất hoạt động theo ngày trong tháng (kiểu GitHub contribution heatmap).
-
-### 3.4. System Configuration (Trang cài đặt)
-
-- **Timer Logic:** Cấu hình thời gian mặc định cho Focus, Short Break, Long Break.
-- **Audio Environment Control:** Cài đặt âm lượng mặc định, chế độ tự động phát nhạc khi bắt đầu phiên, tự động tạm dừng khi nghỉ.
-- **Appearance (Theme System):** Hệ thống đổi chủ đề (Theme) với 3 phong cách cao cấp:
-  - **Nocturne Focus:** Dark Blue (Mặc định).
-  - **Solar Flare:** Warm Orange & Brown.
-  - **Moonlight Mist:** Soft Blue & Grey.
-- **User Account:** Quản lý thông tin hồ sơ, mật khẩu và đăng xuất.
+### 2.3. Analytics System
+- **Weekly Insight:** Thống kê tổng số phút tập trung trong tuần qua biểu đồ cột.
+- **Contribution Map:** Theo dõi tính kỷ luật hàng ngày qua bản đồ nhiệt.
 
 ---
 
-## 4. Yêu cầu phi chức năng (Non-functional Requirements)
+## 3. Đặc tả kỹ thuật (Technical Specifications)
 
-- **Độ tin cậy:** Đồng hồ phải chạy chính xác ngay cả khi tab bị ẩn (Sử dụng Web Workers để tránh trình duyệt "ngủ đông" timer).
-- **Hiệu suất:** Thời gian phản hồi API mục tiêu dưới 200ms.
-- **Tính tương thích:** Chạy ổn định trên các trình duyệt phổ biến: Chrome, Edge, Safari và Firefox.
+### 3.1. Tech Stack
+- **Frontend:** Nuxt 4, Pinia, Tailwind CSS.
+- **Backend (Proposed):** Supabase (PostgreSQL + Auth).
+- **Hosting:** Vercel / Netlify.
+
+### 3.2. Database Schema (Kiến trúc dữ liệu)
+
+#### A. Table: `profiles`
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `id` | uuid | Primary Key (PK) |
+| `email` | text | Unique identifier |
+| `created_at` | timestamptz | Thời gian đăng ký |
+
+#### B. Table: `user_settings`
+| Column | Type | Default |
+| :--- | :--- | :--- |
+| `user_id` | uuid | Foreign Key (FK) -> profiles.id |
+| `focus_time` | integer | 3000 (seconds) |
+| `break_time` | integer | 600 (seconds) |
+| `yt_video_id` | text | 'jfKfPfyJRdk' |
+| `volume` | integer | 100 |
+
+#### C. Table: `pomo_sessions`
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `id` | uuid | PK |
+| `user_id` | uuid | FK -> profiles.id |
+| `type` | text | 'focus' / 'break' |
+| `duration` | integer | Số giây đã hoàn thành |
+| `created_at` | timestamptz | Thời điểm hoàn thành phiên |
 
 ---
 
-## 5. Kiến trúc kỹ thuật (Technical Architecture)
+## 4. Danh sách API Interface (API Endpoints)
 
-| Thành phần | Công nghệ đề xuất |
-| :--- | :--- |
-| **Frontend Framework** | **Vue.js 3 / Nuxt.js** |
-| **Styling** | **Tailwind CSS** (Sử dụng Custom Design Tokens) |
-| **State Management** | **Pinia** (Quản lý trạng thái Timer và Audio toàn cục) |
-| **Backend** | Node.js (Express) hoặc FastAPI |
-| **Database** | PostgreSQL (Lưu lịch sử Sessions) |
-| **Authentication** | JWT (JSON Web Token) + Google Auth Integration |
-| **Deployment** | Vercel (Frontend), Render/Railway (Backend/DB) |
+- **Auth Services**: 
+  - `SIGNUP/LOGIN` qua Google & Email.
+- **Settings API**:
+  - `GET /settings`: Tải cấu hình khi khởi động web.
+  - `PATCH /settings`: Lưu thay đổi khi người dùng chỉnh sửa Option.
+- **History API**:
+  - `POST /sessions`: Lưu lại dữ liệu sau mỗi phiên kết thúc.
+  - `GET /analytics`: Lấy dữ liệu cho trang thống kê.
 
 ---
 
-## 6. Lập lịch phát triển (Development Roadmap)
+## 5. Ràng buộc phi chức năng (Non-Functional)
 
-1. **Giai đoạn 1 (Design & Layout):** Hoàn thiện các trang Mockup Glassmorphism (Đã hoàn thành).
-2. **Giai đoạn 2 (Logic Implementation):** Xây dựng Timer, tích hợp YouTube API và Mood Slider bằng Vue/Nuxt.
-3. **Giai đoạn 3 (Data Persistence):** Xây dựng Backend và hệ thống Đăng nhập để lưu trữ Sessions.
-4. **Giai đoạn 4 (Visual Polishing):** Triển khai hệ thống Theme và tối ưu hóa hiệu ứng chuyển cảnh.
+1. **Anti-Drift Timer:** Sử dụng logic so sánh thời gian hệ thống (`new Date()`) thay vì chỉ dùng `setInterval` để chống lệch giờ trên Chrome.
+2. **Persistence Strategy:** Ưu tiên State Hydration từ Backend trước, sau đó mới dùng LocalStorage dự phòng (Fallback).
+3. **SEO Strategy:** Meta Title động theo trạng thái của Timer (vd: `(25:00) Focus Sanctuary`).
+
+---
+
+## 6. Lộ trình phát triển (Development Roadmap)
+1. **Giai đoạn 1 (Xong):** Hoàn thiện Core UI/Logic (Nuxt 4).
+2. **Giai đoạn 2 (Xong):** Tích hợp YouTube API & Audio Engine.
+3. **Giai đoạn 3 (Đang làm):** Kết nối Database (Supabase) để Sync dữ liệu.
+4. **Giai đoạn 4 (Tương lai):** Đóng gói thành ứng dụng PWA chạy trên điện thoại.
