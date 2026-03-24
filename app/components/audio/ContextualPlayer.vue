@@ -151,6 +151,9 @@ const initPlayer = () => {
 // Lắng nghe store đổi bài
 watch(() => store.currentVideoId, (newId) => {
   if (ytPlayer && ytPlayer.loadVideoById) {
+    // Cập nhật title/author sang trạng thái chờ ngay lập tức để UX mượt hơn
+    store.updateMetadata("Loading Sanctuary...", "Aural Flow")
+    
     ytPlayer.loadVideoById({ videoId: newId })
     if (store.isPlaying) ytPlayer.playVideo()
   }

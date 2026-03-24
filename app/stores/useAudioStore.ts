@@ -55,9 +55,17 @@ export const useAudioStore = defineStore('audio', () => {
     currentAuthor.value = author
   }
 
+  const play = () => {
+    isPlaying.value = true
+    isPlayerVisible.value = true
+  }
+
+  const pause = () => {
+    isPlaying.value = false
+  }
+
   const togglePlay = () => {
-    isPlaying.value = !isPlaying.value
-    if (isPlaying.value) isPlayerVisible.value = true
+    isPlaying.value ? pause() : play()
   }
 
   return {
@@ -74,6 +82,8 @@ export const useAudioStore = defineStore('audio', () => {
     // Actions
     setVideoId,
     updateMetadata,
+    play,
+    pause,
     togglePlay
   }
 })

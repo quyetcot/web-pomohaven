@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useLocalStorage, useDocumentVisibility } from '@vueuse/core'
+import { useAudioStore } from './useAudioStore'
 
 type TimerMode = 'focus' | 'shortBreak' | 'longBreak'
 
@@ -19,6 +20,7 @@ export const useTimerStore = defineStore('timer', () => {
   })
 
   // State
+  const audioStore = useAudioStore()
   const mode = ref<TimerMode>('focus')
   const isRunning = ref(false)
   const timeRemaining = ref(settings.value.focusDuration)
@@ -122,6 +124,13 @@ export const useTimerStore = defineStore('timer', () => {
     expectedEndTime = Date.now() + (timeRemaining.value * 1000)
     timerInterval = setInterval(tick, 200)
     
+    // Sync Audio
+    if (mode.value === 'focus') {
+      audioStore.play()
+    } else {
+      audioStore.pause()
+    }
+
     // Yêu cầu quyền thông báo ngay khi bắt đầu bấm chạy
     if (settings.value.notificationsEnabled && 'Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission()
@@ -131,6 +140,9 @@ export const useTimerStore = defineStore('timer', () => {
   const pause = () => {
     isRunning.value = false
     if (timerInterval) clearInterval(timerInterval)
+    
+    // Sync Audio
+    audioStore.pause()
   }
 
   const toggle = () => {

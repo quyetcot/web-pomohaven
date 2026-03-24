@@ -51,15 +51,38 @@
              class="w-full h-full object-cover opacity-60 group-hover:opacity-90 transition-opacity duration-700" alt="Player preview"/>
       </div>
     </div>
+
+    <!-- Quick Selection Library -->
+    <div class="pt-2">
+      <p class="text-[10px] uppercase font-bold text-muted tracking-widest mb-4">Quick Sanctuary Pick</p>
+      <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide no-scrollbar">
+        <button 
+          v-for="item in curatedPlaylists" 
+          :key="item.id"
+          @click="store.setVideoId(item.id)"
+          class="flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-all whitespace-nowrap shrink-0 group active:scale-95"
+          :class="store.currentVideoId === item.id 
+            ? 'bg-primary-glow/10 border-primary-glow/40 text-primary-glow shadow-[0_0_15px_rgba(75,142,255,0.1)]' 
+            : 'bg-surface-variant/20 border-white/5 text-muted hover:bg-surface-variant/40 hover:border-white/10 hover:text-white'"
+        >
+          <span class="material-symbols-outlined text-lg">{{ item.icon }}</span>
+          <span class="text-xs font-semibold">{{ item.name }}</span>
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { useAudioStore } from '~/stores/useAudioStore'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useMusicLibrary } from '~/composables/useMusicLibrary'
 
 const store = useAudioStore()
+const { getFeaturedTracks } = useMusicLibrary()
 const ytInput = ref('')
+
+const curatedPlaylists = computed(() => getFeaturedTracks())
 
 const handleAddUrl = () => {
   if (ytInput.value) {
@@ -68,3 +91,15 @@ const handleAddUrl = () => {
   }
 }
 </script>
+
+<style scoped>
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+</style>
