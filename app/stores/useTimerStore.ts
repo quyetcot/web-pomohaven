@@ -7,11 +7,12 @@ type TimerMode = 'focus' | 'shortBreak' | 'longBreak'
 export const useTimerStore = defineStore('timer', () => {
   // Settings (Persisted)
   const settings = useLocalStorage('pomohaven_settings_v1', {
-    focusDuration: 50 * 60,       // 50 minutes
-    shortBreakDuration: 10 * 60,   // 10 minutes
-    longBreakDuration: 15 * 60,   // 15 minutes
+    focusDuration: 1 * 60,       // 50 minutes
+    shortBreakDuration: 1 * 60,   // 10 minutes
+    longBreakDuration: 1 * 60,   // 15 minutes
     sessionsBeforeLongBreak: 3,
     soundEnabled: true,
+    countdownBeepEnabled: true,   // New setting for "tít tít"
     notificationsEnabled: true,
     autoStartBreaks: true,
     autoStartPomodoros: true
@@ -22,9 +23,38 @@ export const useTimerStore = defineStore('timer', () => {
   const isRunning = ref(false)
   const timeRemaining = ref(settings.value.focusDuration)
   const sessionsCompleted = ref(0)
+  const lastBeepedSecond = ref(-1) // To prevent duplicate beeps in one second
+
+  // Web Audio Beep Generator
+  const playBeep = (frequency = 440, duration = 0.15) => {
+    if (!settings.value.soundEnabled || !settings.value.countdownBeepEnabled || typeof window === 'undefined') return
+    try {
+      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)()
+      const oscillator = audioCtx.createOscillator()
+      const gainNode = audioCtx.createGain()
+
+      oscillator.connect(gainNode)
+      gainNode.connect(audioCtx.destination)
+
+      // Changed to 'triangle' for sharper sound that punches through music
+      oscillator.type = 'triangle'
+      oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime)
+      
+      // Significantly increased volume from 0.2 to 0.7
+      gainNode.gain.setValueAtTime(0.7, audioCtx.currentTime)
+      gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration)
+
+      oscillator.start()
+      oscillator.stop(audioCtx.currentTime + duration)
+      
+      setTimeout(() => audioCtx.close(), duration * 1000 + 50)
+    } catch (e) {
+      console.warn('Audio Beep blocked or failed:', e)
+    }
+  }
   
   // Keep timer synced when settings are manually changed
-  watch(() => settings.value, (newSettings) => {
+  watch(() => settings.value, (newSettings, oldSettings) => {
     if (!isRunning.value) {
       if (mode.value === 'focus') timeRemaining.value = newSettings.focusDuration
       else if (mode.value === 'shortBreak') timeRemaining.value = newSettings.shortBreakDuration
@@ -73,6 +103,13 @@ export const useTimerStore = defineStore('timer', () => {
     const now = Date.now()
     const newRemaining = Math.max(0, Math.ceil((expectedEndTime - now) / 1000))
     timeRemaining.value = newRemaining
+
+    // Countdown "Tít Tít" Logic
+    if (newRemaining <= 10 && newRemaining > 0 && newRemaining !== lastBeepedSecond.value) {
+      lastBeepedSecond.value = newRemaining
+      const freq = newRemaining <= 5 ? 880 : 440 // Cao hơn ở 3 giây cuối
+      playBeep(freq, 0.08)
+    }
 
     if (newRemaining === 0) {
       completeSession()
