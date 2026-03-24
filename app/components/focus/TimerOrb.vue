@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col items-center">
+  <div class="flex flex-col items-center group relative">
     <!-- Mode Selector -->
     <div class="flex p-1 bg-surface-container rounded-full mb-8 lg:mb-12 shadow-inner">
       <button @click="store.setMode('focus')" 
@@ -73,18 +73,79 @@
         <span class="material-symbols-outlined">skip_next</span>
       </button>
     </div>
+  
+    <!-- Quick Set Time UI -->
+    <div class="mt-12 w-full max-w-lg flex flex-col items-center gap-6 bg-surface-container/20 backdrop-blur-3xl p-8 rounded-[2.5rem] ghost-border border border-white/5 shadow-2xl">
+      <div class="flex items-center gap-3 opacity-40">
+        <div class="h-[1px] w-8 bg-white/20"></div>
+        <div class="text-[0.625rem] uppercase tracking-[0.3em] text-muted font-bold">Quick Adjust Duration</div>
+        <div class="h-[1px] w-8 bg-white/20"></div>
+      </div>
+      
+      <!-- Predefined Chips -->
+      <div class="flex flex-wrap justify-center gap-3">
+        <button v-for="mins in [15, 25, 45, 60, 90]" :key="mins"
+                @click="store.quickSet(mins)"
+                class="px-5 py-2.5 rounded-2xl bg-surface-variant/30 hover:bg-primary-glow/20 border border-white/5 hover:border-primary-glow/40 text-xs text-muted hover:text-primary transition-all active:scale-95 font-medium">
+          {{ mins }}m
+        </button>
+      </div>
+
+      <!-- Enhanced Custom Input -->
+<div class="d-flex gap-2">
+        <div class="flex items-center gap-0 w-full max-w-lg bg-void/60 rounded-2xl border border-white/10 p-1 group/input focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/20 transition-all shadow-inner">
+        <div class="pl-4 text-muted/40 select-none">
+          <span class="material-symbols-outlined text-sm">schedule</span>
+        </div>
+        <input v-model.number="customMins" 
+               type="number"
+               @keyup.enter="handleCustomSet"
+               placeholder="Custom minutes..."
+               class="flex-1 bg-transparent border-none px-3 py-3 text-sm text-white focus:ring-0 outline-none tabular-nums placeholder:text-muted/20" />
+        
+      
+      </div>
+        <button @click="handleCustomSet" 
+                :disabled="!customMins || customMins <= 0"
+                class="px-6 py-2.5 mr-1 rounded-xl bg-primary-glow text-white text-[0.625rem] font-bold uppercase tracking-widest hover:brightness-110 active:scale-[0.97] transition-all disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed flex items-center gap-2">
+          <span>Set</span>
+          <span class="material-symbols-outlined text-xs">arrow_forward</span>
+        </button>
+</div>
+    </div>
   </div>
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { useTimerStore } from '~/stores/useTimerStore'
 
-const store = useTimerStore()
+const store = useTimerStore() 
+const customMins = ref(null)
+
+const handleCustomSet = () => {
+  if (customMins.value && customMins.value > 0) {
+    store.quickSet(customMins.value)
+    customMins.value = null
+  }
+}
 </script>
 
 <style scoped>
 /* Force smooth dashoffset animation */
 circle {
   transition: stroke-dashoffset 1s linear;
+}
+
+/* Chrome, Safari, Edge, Opera - Remove arrows for number input */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox - Remove arrows for number input */
+input[type=number] {
+  -moz-appearance: textfield;
 }
 </style>

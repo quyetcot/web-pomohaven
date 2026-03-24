@@ -17,6 +17,10 @@ export const useAudioStore = defineStore('audio', () => {
   const volumeRain = ref(0)
   const volumeCoffee = ref(0)
   
+  // Shared metadata
+  const currentTitle = ref("Loading Audio...")
+  const currentAuthor = ref("Aural Sanctuary")
+  
   // Keep base video ID synced if user changes default (including on Hydration from LocalStorage)
   watch(() => settings.value.defaultVideoId, (newId) => {
     if (!isPlaying.value) {
@@ -46,6 +50,11 @@ export const useAudioStore = defineStore('audio', () => {
     }
   }
 
+  const updateMetadata = (title: string, author: string) => {
+    currentTitle.value = title
+    currentAuthor.value = author
+  }
+
   const togglePlay = () => {
     isPlaying.value = !isPlaying.value
     if (isPlaying.value) isPlayerVisible.value = true
@@ -59,9 +68,12 @@ export const useAudioStore = defineStore('audio', () => {
     isPlayerVisible,
     volumeRain,
     volumeCoffee,
+    currentTitle,
+    currentAuthor,
     
     // Actions
     setVideoId,
+    updateMetadata,
     togglePlay
   }
 })

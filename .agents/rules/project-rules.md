@@ -1,10 +1,10 @@
 ---
 trigger: always_on
 glob: "**/*.{js,ts,vue,css,html,md}"
-description: PomoTune Project Code Conventions and Standards
+description: PomoHaven Project Code Conventions and Standards
 ---
 
-# PomoTune Production Rules & Standards (v3.1)
+# PomoHaven Production Rules & Standards (v4.0)
 
 Quá trình lập trình và maintain dự án này PHẢI tuân thủ tuyệt đối các nguyên tắc sau đây để giữ quy trình chuyên nghiệp:
 
@@ -46,3 +46,15 @@ Bất cứ khi nào tạo UI Label tĩnh, thông báo ứng dụng, hay đặt t
 - Stats/History/Analytics -> **Performance Analytics**
 - Settings/Config -> **System Configuration**
 - Break -> **Rest Period**
+
+## 7. Quy Trình Phát Triển An Toàn (Anti-Bug Development Process)
+
+> **⚠️ BẮT BUỘC:** Mỗi khi user yêu cầu một tính năng mới, AI Agent PHẢI áp dụng quy trình tại `d:\Projects\web-pomorodo\.agents\workflows\add-feature.md`.
+
+Các ràng buộc code cứng để tránh bug:
+
+- **SSR Safety**: Tất cả code sử dụng `window`, `document`, `navigator` phải nằm trong `onMounted()` hoặc có kiểm tra `typeof window !== 'undefined'`.
+- **Event Isolation**: Khi dùng Drag & Drop (useDraggable), bắt buộc phải dùng `onStart` filter để loại trừ các phần tử tương tác (`input`, `button`, `a`) khỏi việc kích hoạt drag.
+- **Store-First**: Logic nghiệp vụ (business logic) PHẢI đặt trong Pinia Store. Component chỉ được bind template và gọi action.
+- **Không xóa code đang hoạt động**: Khi thêm tính năng mới, không xóa code cũ cho đến khi đã xác nhận tính năng mới hoạt động.
+- **Self-QA bắt buộc**: Sau khi code xong, AI Agent phải dùng Browser Agent để tự test trước khi báo cáo "Xong" với user.

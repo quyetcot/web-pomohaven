@@ -16,8 +16,8 @@
         <img class="w-full h-full object-cover" :src="`https://img.youtube.com/vi/${store.currentVideoId}/default.jpg`"/>
       </div>
       <div class="hidden sm:block">
-        <p class="text-xs font-semibold truncate max-w-[120px] text-white" :title="currentTitle">{{ currentTitle }}</p>
-        <p class="text-[0.625rem] text-primary truncate max-w-[120px]" :title="currentAuthor">{{ currentAuthor }} • YT Music</p>
+        <p class="text-xs font-semibold truncate max-w-[120px] text-white" :title="store.currentTitle">{{ store.currentTitle }}</p>
+        <p class="text-[0.625rem] text-primary truncate max-w-[120px]" :title="store.currentAuthor">{{ store.currentAuthor }} • YT Music</p>
       </div>
     </div>
     
@@ -102,15 +102,11 @@ const playerStyle = computed(() => ({
   transform: store.isPlayerVisible ? 'none' : 'translateY(100px)'
 }))
 
-const currentTitle = ref("Loading Audio...")
-const currentAuthor = ref("Aural Sanctuary")
-
 const extractVideoInfo = (event) => {
   if (!event || !event.target || !event.target.getVideoData) return
   const data = event.target.getVideoData()
   if (data && data.title) {
-    currentTitle.value = data.title
-    currentAuthor.value = data.author || ''
+    store.updateMetadata(data.title, data.author || '')
   }
 }
 

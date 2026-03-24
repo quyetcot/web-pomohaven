@@ -7,9 +7,9 @@ type TimerMode = 'focus' | 'shortBreak' | 'longBreak'
 export const useTimerStore = defineStore('timer', () => {
   // Settings (Persisted)
   const settings = useLocalStorage('pomohaven_settings_v1', {
-    focusDuration: 1 * 60,       // 50 minutes
-    shortBreakDuration: 1 * 60,   // 10 minutes
-    longBreakDuration: 1 * 60,   // 15 minutes
+    focusDuration: 50 * 60,       // 50 minutes
+    shortBreakDuration: 10 * 60,   // 10 minutes
+    longBreakDuration: 15 * 60,   // 15 minutes
     sessionsBeforeLongBreak: 3,
     soundEnabled: true,
     countdownBeepEnabled: true,   // New setting for "tít tít"
@@ -146,6 +146,14 @@ export const useTimerStore = defineStore('timer', () => {
     mode.value = newMode
     reset()
   }
+
+  const quickSet = (minutes: number) => {
+    const seconds = minutes * 60
+    if (mode.value === 'focus') settings.value.focusDuration = seconds
+    else if (mode.value === 'shortBreak') settings.value.shortBreakDuration = seconds
+    else if (mode.value === 'longBreak') settings.value.longBreakDuration = seconds
+    reset()
+  }
   
   const triggerAlarm = () => {
     // 1. Phập âm thanh
@@ -206,6 +214,7 @@ export const useTimerStore = defineStore('timer', () => {
     toggle,
     reset,
     setMode,
+    quickSet,
     skipSession
   }
 })
