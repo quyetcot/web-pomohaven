@@ -15,7 +15,7 @@
       <input v-model="ytInput" @keyup.enter="handleAddUrl"
              class="w-full bg-surface-variant/40 border-none rounded-2xl px-6 py-4 text-sm focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-muted/50 text-white" 
              placeholder="Paste YouTube URL..." type="text"/>
-      <button @click="handleAddUrl" class="absolute right-3 top-3 bg-primary-glow/20 hover:bg-primary-glow text-primary hover:text-void p-2 rounded-lg transition-colors active:scale-95">
+      <button @click="handleAddUrl" class="absolute right-1.5 top-1.5 bg-primary-glow/20 hover:bg-primary-glow text-primary hover:text-void px-4 py-2 rounded-lg transition-colors active:scale-95">
         <span class="material-symbols-outlined text-sm font-bold">add</span>
       </button>
     </div>

@@ -92,7 +92,7 @@
       </div>
 
       <!-- Enhanced Custom Input -->
-<div class="d-flex gap-2">
+<div class="flex gap-2">
         <div class="flex items-center gap-0 w-full max-w-lg bg-void/60 rounded-2xl border border-white/10 p-1 group/input focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/20 transition-all shadow-inner">
         <div class="pl-4 text-muted/40 select-none">
           <span class="material-symbols-outlined text-sm">schedule</span>

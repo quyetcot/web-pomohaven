@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  pomohaven:
+    build: .
+    container_name: pomohaven-app
+    ports:
+      - "3000:3000"
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - HOST=0.0.0.0
+      - PORT=3000
