@@ -4,7 +4,17 @@
   </NuxtLayout>
 </template>
 
+
 <script setup>
+import { onMounted } from 'vue'
+import { useAuthStore } from '~/stores/useAuthStore'
+
+const authStore = useAuthStore()
+
+onMounted(() => {
+  authStore.initAuthSession()
+})
+
 useSeoMeta({
   title: 'PomoHaven - The Deep Focus Sanctuary',
   ogTitle: 'PomoHaven - The Deep Focus Sanctuary',
