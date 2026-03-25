@@ -83,7 +83,7 @@
         </div>
 
         <!-- Add Custom Card -->
-        <div class="group relative aspect-[3/4] rounded-[1.5rem] bg-surface-container/20 border-2 border-dashed border-white/5 flex flex-col items-center justify-center gap-4 cursor-pointer hover:border-primary/40 hover:bg-surface-container/40 transition-all active:scale-95">
+        <!-- <div class="group relative aspect-[3/4] rounded-[1.5rem] bg-surface-container/20 border-2 border-dashed border-white/5 flex flex-col items-center justify-center gap-4 cursor-pointer hover:border-primary/40 hover:bg-surface-container/40 transition-all active:scale-95">
           <div class="w-12 h-12 rounded-full bg-surface-variant/40 flex items-center justify-center text-muted group-hover:text-primary-glow transition-colors">
             <span class="material-symbols-outlined text-2xl">add</span>
           </div>
@@ -91,23 +91,24 @@
             <span class="text-[0.6875rem] font-bold uppercase tracking-widest text-muted block mb-1">Add Personal Track</span>
             <span class="text-[10px] text-muted/40 uppercase">Paste URL in Dashboard</span>
           </div>
-        </div>
+        </div> -->
       </div>
     </section>
   </div>
 </template>
 
-<script setup>
+<script setup >
 import { ref, computed } from 'vue'
 import { useAudioStore } from '~/stores/useAudioStore'
-import { useMusicLibrary } from '~/composables/useMusicLibrary'
+import { useMusicStore } from '~/stores/useMusicStore'
 
 const audioStore = useAudioStore()
-const { genres, getTracksByGenre, getFeaturedTracks } = useMusicLibrary()
+const musicStore = useMusicStore()
 
 const activeGenre = ref('All')
-const activeTracks = computed(() => getTracksByGenre(activeGenre.value))
-const featuredTrack = computed(() => getFeaturedTracks()[0])
+const activeTracks = computed(() => musicStore.getTracksByGenre(activeGenre.value))
+const featuredTrack = computed(() => musicStore.getFeaturedTracks()[0])
+const genres = computed(() => musicStore.genres)
 </script>
 
 <style scoped>
