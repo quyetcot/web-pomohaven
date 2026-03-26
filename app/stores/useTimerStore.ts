@@ -4,6 +4,7 @@ import { useLocalStorage, useDocumentVisibility } from '@vueuse/core'
 import { useAudioStore } from './useAudioStore'
 import { useAuthStore } from './useAuthStore'
 import { useSupabase } from '~/composables/useSupabase'
+import { useSettingsSync } from '~/composables/useSettingsSync'
 
 type TimerMode = 'focus' | 'shortBreak' | 'longBreak'
 
@@ -87,6 +88,10 @@ export const useTimerStore = defineStore('timer', () => {
       else if (mode.value === 'shortBreak') timeRemaining.value = newSettings.shortBreakDuration
       else if (mode.value === 'longBreak') timeRemaining.value = newSettings.longBreakDuration
     }
+    
+    // Sync to Supabase
+    const { saveSettings } = useSettingsSync()
+    saveSettings()
   }, { deep: true })
   
   // Anti-drift variables

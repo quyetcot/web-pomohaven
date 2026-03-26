@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
 import { useLocalStorage } from '@vueuse/core'
+import { useAuthStore } from './useAuthStore'
+import { useSupabase } from '~/composables/useSupabase'
 
 export interface Track {
   id: string
@@ -71,8 +71,30 @@ export const useMusicStore = defineStore('music', () => {
   // Computed
   const library = computed(() => [...defaultLibrary, ...personalTracks.value])
 
+  const supabase = useSupabase()
+  const authStore = useAuthStore()
+
+  // Sync Actions
+  const loadPersonalTracks = async () => {
+    if (!authStore.user) return
+    const { data } = await (supabase.from('personal_tracks') as any)
+      .select('*')
+      .eq('user_id', authStore.user.id)
+    
+    if (data) {
+      personalTracks.value = data.map((t: any) => ({
+        id: t.yt_video_id,
+        name: t.name,
+        title: t.name,
+        author: 'Personal Collection',
+        genre: t.genre || 'Personal',
+        icon: 'music_note'
+      }))
+    }
+  }
+
   // Actions
-  const addTrack = (id: string, name: string, genre: string) => {
+  const addTrack = async (id: string, name: string, genre: string) => {
     // Avoid duplicates
     if (personalTracks.value.some(t => t.id === id) || defaultLibrary.some(t => t.id === id)) {
       return
@@ -81,17 +103,34 @@ export const useMusicStore = defineStore('music', () => {
     const newTrack: Track = {
       id,
       name,
-      title: name, // Default title to name
+      title: name,
       author: 'Personal Collection',
       genre: genre || 'Personal',
       icon: 'music_note'
     }
 
     personalTracks.value.push(newTrack)
+
+    // Sync to DB
+    if (authStore.user) {
+      await (supabase.from('personal_tracks') as any).insert({
+        user_id: authStore.user.id,
+        yt_video_id: id,
+        name,
+        genre: genre || 'Personal'
+      })
+    }
   }
 
-  const removeTrack = (id: string) => {
+  const removeTrack = async (id: string) => {
     personalTracks.value = personalTracks.value.filter(t => t.id !== id)
+    
+    if (authStore.user) {
+      await (supabase.from('personal_tracks') as any)
+        .delete()
+        .eq('user_id', authStore.user.id)
+        .eq('yt_video_id', id)
+    }
   }
 
   const getTracksByGenre = (genre: string) => {
@@ -111,6 +150,7 @@ export const useMusicStore = defineStore('music', () => {
     library,
     personalTracks,
     genres,
+    loadPersonalTracks,
     addTrack,
     removeTrack,
     getTracksByGenre,

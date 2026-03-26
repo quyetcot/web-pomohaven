@@ -8,11 +8,20 @@
 <script setup>
 import { onMounted } from 'vue'
 import { useAuthStore } from '~/stores/useAuthStore'
+import { useMusicStore } from '~/stores/useMusicStore'
 
 const authStore = useAuthStore()
 
-onMounted(() => {
-  authStore.initAuthSession()
+onMounted(async () => {
+  await authStore.initAuthSession()
+  
+  // Sync Settings
+  const { loadSettings } = useSettingsSync()
+  loadSettings()
+
+  // Sync Music
+  const musicStore = useMusicStore()
+  musicStore.loadPersonalTracks()
 })
 
 useSeoMeta({
