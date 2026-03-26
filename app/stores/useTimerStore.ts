@@ -2,6 +2,8 @@ import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import { useLocalStorage, useDocumentVisibility } from '@vueuse/core'
 import { useAudioStore } from './useAudioStore'
+import { useAuthStore } from './useAuthStore'
+import { useSupabase } from '~/composables/useSupabase'
 
 type TimerMode = 'focus' | 'shortBreak' | 'longBreak'
 
@@ -12,12 +14,13 @@ export const useTimerStore = defineStore('timer', () => {
     shortBreakDuration: 10 * 60,   // 10 minutes
     longBreakDuration: 15 * 60,   // 15 minutes
     sessionsBeforeLongBreak: 3,
+    dailyGoal: 8,                 // Daily focus blocks
     soundEnabled: true,
     countdownBeepEnabled: true,   // New setting for "tít tít"
     notificationsEnabled: true,
     autoStartBreaks: true,
     autoStartPomodoros: true
-  })
+  }, { mergeDefaults: true })
 
   // State
   const audioStore = useAudioStore()
@@ -25,7 +28,29 @@ export const useTimerStore = defineStore('timer', () => {
   const isRunning = ref(false)
   const timeRemaining = ref(settings.value.focusDuration)
   const sessionsCompleted = ref(0)
+  const todayCompletedCount = ref(0) // New: Persisted cross-session via DB
   const lastBeepedSecond = ref(-1) // To prevent duplicate beeps in one second
+  const sessionStartedAt = ref(0)
+
+  // Fetch true daily completed count on mount
+  const fetchTodayCompleted = async () => {
+    const authStore = useAuthStore()
+    if (!authStore.user) return
+
+    const supabase = useSupabase()
+    const todayStr = new Date().toISOString().split('T')[0]
+    
+    // Using gte started_at today
+    const { count } = await (supabase.from('pomo_sessions') as any)
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', authStore.user.id)
+      .eq('status', 'completed')
+      .gte('started_at', todayStr + 'T00:00:00.000Z')
+
+    if (count !== null) {
+      todayCompletedCount.value = count
+    }
+  }
 
   // Web Audio Beep Generator
   const playBeep = (frequency = 440, duration = 0.15) => {
@@ -120,6 +145,12 @@ export const useTimerStore = defineStore('timer', () => {
 
   const start = () => {
     if (isRunning.value) return
+    
+    // Đánh dấu thời gian bắt đầu thực sự nếu là session mới tinh
+    if (timeRemaining.value === currentDuration.value && sessionStartedAt.value === 0) {
+      sessionStartedAt.value = Date.now()
+    }
+    
     isRunning.value = true
     expectedEndTime = Date.now() + (timeRemaining.value * 1000)
     timerInterval = setInterval(tick, 200)
@@ -150,8 +181,10 @@ export const useTimerStore = defineStore('timer', () => {
   }
 
   const reset = () => {
+    recordSession('abandoned')
     pause()
     timeRemaining.value = currentDuration.value
+    sessionStartedAt.value = 0
   }
 
   const setMode = (newMode: TimerMode) => {
@@ -185,7 +218,34 @@ export const useTimerStore = defineStore('timer', () => {
     }
   }
 
+  const recordSession = (status: 'completed' | 'skipped' | 'abandoned') => {
+    if (sessionStartedAt.value === 0) return
+    const authStore = useAuthStore()
+    if (!authStore.user) return
+
+    const actualDuration = currentDuration.value - timeRemaining.value
+    // If abandoned before 10 seconds of work, ignore this to avoid DB spam
+    if (status !== 'completed' && actualDuration < 10) return
+
+    const supabase = useSupabase()
+    const typeMapping: Record<TimerMode, string> = { focus: 'deep_focus', shortBreak: 'short_break', longBreak: 'long_break' }
+    
+    ;(supabase.from('pomo_sessions') as any).insert({
+      user_id: authStore.user.id,
+      type: typeMapping[mode.value],
+      planned_duration: currentDuration.value,
+      actual_duration: actualDuration,
+      status: status,
+      started_at: new Date(sessionStartedAt.value).toISOString()
+    }).then(({error}: any) => { 
+      if (error) console.error('Failed to log session:', error.message) 
+    })
+    
+    sessionStartedAt.value = 0
+  }
+
   const completeSession = () => {
+    recordSession('completed')
     pause()
     triggerAlarm()
 
@@ -193,6 +253,7 @@ export const useTimerStore = defineStore('timer', () => {
     
     if (mode.value === 'focus') {
       sessionsCompleted.value++
+      todayCompletedCount.value++ // Instantly reflect in Sidebar UI
       nextMode = sessionsCompleted.value % settings.value.sessionsBeforeLongBreak === 0 ? 'longBreak' : 'shortBreak'
       setMode(nextMode)
       if (settings.value.autoStartBreaks) start()
@@ -204,7 +265,15 @@ export const useTimerStore = defineStore('timer', () => {
   }
 
   const skipSession = () => {
-    completeSession()
+    recordSession('skipped')
+    
+    let nextMode: TimerMode = 'focus'
+    if (mode.value === 'focus') {
+      nextMode = (sessionsCompleted.value + 1) % settings.value.sessionsBeforeLongBreak === 0 ? 'longBreak' : 'shortBreak'
+      setMode(nextMode)
+    } else {
+      setMode('focus')
+    }
   }
 
   return {
@@ -213,6 +282,7 @@ export const useTimerStore = defineStore('timer', () => {
     isRunning,
     timeRemaining,
     sessionsCompleted,
+    todayCompletedCount,
     settings,
     
     // Getters
@@ -227,6 +297,7 @@ export const useTimerStore = defineStore('timer', () => {
     reset,
     setMode,
     quickSet,
-    skipSession
+    skipSession,
+    fetchTodayCompleted
   }
 })

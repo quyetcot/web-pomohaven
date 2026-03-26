@@ -1,21 +1,75 @@
 <template>
-  <div class="h-screen flex items-center justify-center p-6 bg-void relative overflow-hidden">
-    <div class="absolute inset-0 bg-primary-glow/5 blur-[120px] rounded-full w-full h-full max-w-2xl mx-auto pointer-events-none"></div>
-    <div class="w-full max-w-sm glass-panel bg-surface-container/60 backdrop-blur-3xl ghost-border rounded-3xl p-8 z-10 text-center">
-      <div class="text-3xl font-bold tracking-tighter text-primary mb-6">PomoTune</div>
-      <p class="text-muted text-sm mb-8">Enter your Sanctuary</p>
-      
-      <button class="w-full py-4 rounded-full bg-primary-glow/20 text-primary font-bold transition-all hover:bg-primary-glow hover:text-void signature-glow active:scale-95 flex items-center justify-center gap-2">
-        <span class="material-symbols-outlined text-lg">login</span> Sign In / Sign Up
+  <div class="min-h-screen flex items-center justify-center bg-void text-white p-6 relative overflow-hidden">
+    <!-- Ambient Glow Background -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary-glow/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+    <div class="relative w-full max-w-md rounded-[2rem] bg-surface-container/60 backdrop-blur-[24px] overflow-hidden p-10 flex flex-col items-center">
+      <!-- Ghost Border -->
+      <div class="absolute inset-0 border-t border-l border-primary/10 rounded-[2rem] pointer-events-none"></div>
+
+      <!-- Icon/Logo Area -->
+      <div class="w-16 h-16 rounded-full bg-surface-floating/60 backdrop-blur-xl flex items-center justify-center mb-8 relative">
+         <div class="absolute inset-0 border-t border-l border-primary/10 rounded-full pointer-events-none"></div>
+         <span class="material-symbols-outlined text-3xl text-primary">account_circle</span>
+      </div>
+
+      <h1 class="text-3xl font-bold tracking-tight text-primary mb-2 text-center">Welcome Back</h1>
+      <p class="text-[0.6875rem] uppercase tracking-[0.15em] font-medium text-muted mb-10 text-center">Access your Deep Focus Sanctuary</p>
+
+      <button 
+        @click="handleGoogleLogin" 
+        :disabled="isLoading"
+        class="w-full flex items-center justify-center gap-3 bg-surface-floating/60 hover:bg-primary-glow text-white rounded-full py-4 px-6 transition-all duration-300 group relative overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
+        :class="{'hover:shadow-[0_0_24px_rgba(75,142,255,0.4)]': !isLoading}"
+      >
+        <div class="absolute inset-0 border-t border-l border-primary/20 rounded-full pointer-events-none group-hover:border-transparent transition-colors"></div>
+        <img v-if="!isLoading" src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="w-5 h-5" />
+        <span class="material-symbols-outlined animate-spin" v-else>progress_activity</span>
+        <span class="font-medium tracking-wide">Continue with Google</span>
       </button>
       
-      <NuxtLink to="/" class="block mt-6 text-xs text-muted hover:text-primary transition-colors uppercase tracking-widest">
-        Return to Dashboard
-      </NuxtLink>
+      <p v-if="errorMsg" class="mt-4 text-[0.6875rem] text-red-400 text-center">{{ errorMsg }}</p>
+
+      <div class="mt-8 text-center text-muted text-xs">
+        <NuxtLink to="/" class="hover:text-primary transition-colors flex items-center justify-center gap-2 uppercase tracking-widest text-[0.6875rem]">
+          Return to Dashboard
+        </NuxtLink>
+      </div>
     </div>
   </div>
 </template>
 
-<script setup>
-definePageMeta({ layout: false })
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '~/stores/useAuthStore'
+
+// Hide standard layout header/sidebar for the auth page
+definePageMeta({
+  layout: false
+})
+
+const authStore = useAuthStore()
+const router = useRouter()
+const isLoading = ref(false)
+const errorMsg = ref('')
+
+onMounted(() => {
+  // If already logged in, redirect to dashboard
+  if (authStore.user) {
+    router.push('/')
+  }
+})
+
+const handleGoogleLogin = async () => {
+  isLoading.value = true
+  errorMsg.value = ''
+  try {
+    await authStore.loginWithGoogle()
+    // It will redirect out of the application
+  } catch (error: any) {
+    errorMsg.value = error.message
+    isLoading.value = false
+  }
+}
 </script>

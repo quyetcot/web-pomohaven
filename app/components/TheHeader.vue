@@ -12,12 +12,16 @@
       <NuxtLink to="/settings" class="active:scale-95 transition-transform text-primary" aria-label="System Configuration">
         <span class="material-symbols-outlined">settings</span>
       </NuxtLink>
-      <NuxtLink to="/auth" class="active:scale-95 transition-transform text-primary" aria-label="User Account">
-        <span class="material-symbols-outlined">account_circle</span>
+      <NuxtLink to="/auth" class="active:scale-95 transition-transform text-primary flex items-center justify-center" aria-label="User Account">
+        <img v-if="authStore.user?.user_metadata?.avatar_url" :src="authStore.user.user_metadata.avatar_url" class="w-7 h-7 rounded-full border border-primary/20 object-cover" alt="Avatar" />
+        <span v-else class="material-symbols-outlined">account_circle</span>
       </NuxtLink>
     </div>
   </header>
 </template>
 
 <script setup>
+import { useAuthStore } from '~/stores/useAuthStore'
+
+const authStore = useAuthStore()
 </script>
