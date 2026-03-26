@@ -2,6 +2,9 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { useSupabase } from '~/composables/useSupabase'
 import type { User } from '@supabase/supabase-js'
+import { useTimerStore } from './useTimerStore'
+import { useAudioStore } from './useAudioStore'
+import { useMusicStore } from './useMusicStore'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
@@ -15,12 +18,35 @@ export const useAuthStore = defineStore('auth', () => {
     const { data: { session } } = await supabase.auth.getSession()
     user.value = session?.user ?? null
     
+    // Ensure profile exists for current session (handles returning OAuth users)
+    if (session?.user) {
+      await ensureProfile(session.user)
+    }
+    
     // Listen for auth state changes globally
-    supabase.auth.onAuthStateChange((_event, session) => {
+    supabase.auth.onAuthStateChange(async (_event, session) => {
       user.value = session?.user ?? null
+      // On every sign-in, ensure profile exists (Google OAuth may not trigger DB trigger)
+      if (_event === 'SIGNED_IN' && session?.user) {
+        await ensureProfile(session.user)
+      }
     })
     
     isInitialized.value = true
+  }
+
+  // Ensures profile & settings rows exist for the user (idempotent upsert)
+  const ensureProfile = async (authUser: User) => {
+    // Upsert profile
+    await (supabase.from('profiles') as any).upsert({
+      id: authUser.id,
+      email: authUser.email,
+    }, { onConflict: 'id', ignoreDuplicates: true })
+
+    // Upsert settings (creates default row if not present)
+    await (supabase.from('user_settings') as any).upsert({
+      user_id: authUser.id,
+    }, { onConflict: 'user_id', ignoreDuplicates: true })
   }
 
   const loginWithGoogle = async (redirectTo?: string) => {
@@ -57,6 +83,12 @@ export const useAuthStore = defineStore('auth', () => {
       console.error('Error logging out:', error.message)
       throw error
     }
+    
+    // Clear All Local Data
+    useTimerStore().clearAllData()
+    useAudioStore().clearAllData()
+    useMusicStore().resetStore()
+
     user.value = null
   }
 

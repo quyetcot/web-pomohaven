@@ -93,6 +93,13 @@ export const useMusicStore = defineStore('music', () => {
     }
   }
 
+  /* 
+  // OLD LOGIC: Local-only tracks
+  const addTrack = (id: string, name: string, genre: string) => {
+    personalTracks.value.push({ id, name, title: name, author: 'Personal', genre })
+  }
+  */
+
   // Actions
   const addTrack = async (id: string, name: string, genre: string) => {
     // Avoid duplicates
@@ -104,25 +111,35 @@ export const useMusicStore = defineStore('music', () => {
       id,
       name,
       title: name,
-      author: 'Personal Collection',
+      author: 'Personal Sanctuary',
       genre: genre || 'Personal',
       icon: 'music_note'
     }
 
     personalTracks.value.push(newTrack)
 
-    // Sync to DB
+    // Sync to DB if user is logged in
     if (authStore.user) {
-      await (supabase.from('personal_tracks') as any).insert({
+      const { error } = await (supabase.from('personal_tracks') as any).insert({
         user_id: authStore.user.id,
         yt_video_id: id,
         name,
         genre: genre || 'Personal'
       })
+
+      if (error) {
+        // Rollback local insert on DB failure
+        personalTracks.value = personalTracks.value.filter(t => t.id !== id)
+        console.error('[MusicStore] Failed to save track to DB:', error.message, error)
+        throw new Error(error.message)
+      }
     }
   }
 
   const removeTrack = async (id: string) => {
+    /* 
+    // OLD LOGIC: personalTracks.value = personalTracks.value.filter(t => t.id !== id)
+    */
     personalTracks.value = personalTracks.value.filter(t => t.id !== id)
     
     if (authStore.user) {
@@ -146,6 +163,10 @@ export const useMusicStore = defineStore('music', () => {
     return [...curated, ...personalTracks.value]
   }
 
+  const resetStore = () => {
+    personalTracks.value = []
+  }
+
   return {
     library,
     personalTracks,
@@ -154,6 +175,7 @@ export const useMusicStore = defineStore('music', () => {
     addTrack,
     removeTrack,
     getTracksByGenre,
-    getFeaturedTracks
+    getFeaturedTracks,
+    resetStore
   }
 })

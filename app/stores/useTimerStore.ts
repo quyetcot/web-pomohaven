@@ -281,6 +281,22 @@ export const useTimerStore = defineStore('timer', () => {
     }
   }
 
+  const clearAllData = () => {
+    pause()
+    // Reset Settings manually since useLocalStorage can't be easily "reset" to initial object
+    settings.value.focusDuration = 50 * 60
+    settings.value.shortBreakDuration = 10 * 60
+    settings.value.longBreakDuration = 15 * 60
+    settings.value.sessionsBeforeLongBreak = 3
+    settings.value.dailyGoal = 8
+    
+    // Reset State
+    sessionsCompleted.value = 0
+    todayCompletedCount.value = 0
+    timeRemaining.value = settings.value.focusDuration
+    mode.value = 'focus'
+  }
+
   return {
     // State
     mode,
@@ -303,6 +319,7 @@ export const useTimerStore = defineStore('timer', () => {
     setMode,
     quickSet,
     skipSession,
-    fetchTodayCompleted
+    fetchTodayCompleted,
+    clearAllData
   }
 })

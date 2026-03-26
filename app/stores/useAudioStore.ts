@@ -36,25 +36,30 @@ export const useAudioStore = defineStore('audio', () => {
   }, { immediate: true })
   
   const setVideoId = (input: string) => {
-    // Nếu truyền thẳng ID 11 ký tự (từ thư viện Library.vue)
-    if (input.length === 11 && !input.includes('/')) {
-      settings.value.defaultVideoId = input
-      currentVideoId.value = input
+    const vid = extractVideoId(input)
+    if (vid) {
+      currentVideoId.value = vid
       isPlaying.value = true
       isPlayerVisible.value = true
-      return
     }
+  }
 
-    // Nếu truyền Link YouTube (từ Dashboard / Settings)
+  const setDefaultTrack = (input: string) => {
+    const vid = extractVideoId(input)
+    if (vid) {
+      settings.value.defaultVideoId = vid
+      // Also update current playing if nothing is playing or if we want immediate feedback
+      if (!isPlaying.value) {
+        currentVideoId.value = vid
+      }
+    }
+  }
+
+  const extractVideoId = (input: string) => {
+    if (input.length === 11 && !input.includes('/')) return input
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
     const match = input.match(regExp)
-
-    if (match && match[2] && match[2].length === 11) {
-      settings.value.defaultVideoId = match[2] // Lưu thẳng vào LocalStorage
-      currentVideoId.value = match[2]
-      isPlaying.value = true
-      isPlayerVisible.value = true
-    }
+    return (match && match[2] && match[2].length === 11) ? match[2] : null
   }
 
   const updateMetadata = (title: string, author: string) => {
@@ -75,6 +80,13 @@ export const useAudioStore = defineStore('audio', () => {
     isPlaying.value ? pause() : play()
   }
 
+  const clearAllData = () => {
+    pause()
+    settings.value.defaultVideoId = 'jfKfPfyJRdk'
+    settings.value.defaultVolume = 100
+    currentVideoId.value = 'jfKfPfyJRdk'
+  }
+
   return {
     // State
     settings,
@@ -88,9 +100,11 @@ export const useAudioStore = defineStore('audio', () => {
     
     // Actions
     setVideoId,
+    setDefaultTrack,
     updateMetadata,
     play,
     pause,
-    togglePlay
+    togglePlay,
+    clearAllData
   }
 })
