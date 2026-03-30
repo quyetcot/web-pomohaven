@@ -124,36 +124,75 @@
         <div 
           v-for="track in activeTracks" 
           :key="track.id"
-          @click="audioStore.setVideoId(track.id)"
           class="group relative aspect-[3/4] rounded-[1.5rem] overflow-hidden bg-surface-container cursor-pointer transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl active:scale-[0.98]"
         >
           <!-- Ghost Border -->
           <div class="absolute inset-0 border-t border-l border-white/10 rounded-[1.5rem] pointer-events-none z-20"></div>
 
-          <!-- Thumbnail Background -->
-          <img class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-30 group-hover:opacity-50" 
-               :src="`https://img.youtube.com/vi/${track.id}/hqdefault.jpg`" alt="Track thumbnail"/>
-          
-          <div class="absolute inset-0 bg-gradient-to-t from-void via-void/60 to-transparent"></div>
-          
-          <!-- Content Overlay -->
-          <div class="absolute bottom-0 left-0 p-6 w-full z-10">
-            <div class="flex items-center gap-2 mb-3">
-              <span class="material-symbols-outlined text-[10px] text-primary">{{ track.icon || 'music_note' }}</span>
-              <span class="text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-primary">{{ track.genre }}</span>
+          <!-- Delete Button (Personal tracks only) -->
+          <button
+            v-if="isPersonalTrack(track.id)"
+            @click.stop="confirmDeleteId = confirmDeleteId === track.id ? null : track.id"
+            aria-label="Delete track"
+            class="absolute top-3 right-3 z-30 w-8 h-8 rounded-full bg-void/60 backdrop-blur-md
+                   flex items-center justify-center opacity-0 group-hover:opacity-100
+                   hover:bg-red-500/80 text-muted hover:text-white transition-all duration-300"
+          >
+            <span class="material-symbols-outlined text-[16px]">delete</span>
+          </button>
+
+          <!-- Confirm Delete Overlay -->
+          <div
+            v-if="confirmDeleteId === track.id"
+            @click.stop
+            class="absolute inset-0 z-30 bg-void/90 backdrop-blur-md flex flex-col items-center justify-center gap-4 p-6 rounded-[1.5rem]"
+          >
+            <span class="material-symbols-outlined text-3xl text-red-400">delete_forever</span>
+            <p class="text-xs text-center text-white font-semibold">Remove "{{ track.name }}" from your library?</p>
+            <div class="flex gap-3">
+              <button
+                @click.stop="confirmDeleteId = null"
+                class="px-4 py-2 rounded-full text-[0.625rem] font-bold uppercase tracking-widest
+                       bg-surface-variant text-muted hover:text-white transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                @click.stop="handleDeleteTrack(track.id)"
+                class="px-4 py-2 rounded-full text-[0.625rem] font-bold uppercase tracking-widest
+                       bg-red-500/80 text-white hover:bg-red-500 transition-colors active:scale-95"
+              >
+                Remove
+              </button>
             </div>
+          </div>
+
+          <!-- Thumbnail Background -->
+          <div @click="audioStore.setVideoId(track.id)">
+            <img class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-30 group-hover:opacity-50" 
+                 :src="`https://img.youtube.com/vi/${track.id}/hqdefault.jpg`" alt="Track thumbnail"/>
             
-            <h3 class="text-base font-bold mb-1 text-white line-clamp-2 leading-snug group-hover:text-primary-glow transition-colors duration-300">
-              {{ track.title }}
-            </h3>
-            <p class="text-[0.6875rem] text-muted mb-4 opacity-60">{{ track.author }}</p>
+            <div class="absolute inset-0 bg-gradient-to-t from-void via-void/60 to-transparent"></div>
             
-            <div class="flex items-center justify-between mt-auto">
-              <span class="text-[0.625rem] font-medium text-muted/60 bg-surface/40 backdrop-blur-md px-2 py-1 rounded-lg border border-white/5">
-                Infinite Loop
-              </span>
-              <div class="w-10 h-10 rounded-full bg-primary-glow flex items-center justify-center shadow-[0_0_15px_rgba(75,142,255,0.4)] translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                <span class="material-symbols-outlined text-void font-bold">play_arrow</span>
+            <!-- Content Overlay -->
+            <div class="absolute bottom-0 left-0 p-6 w-full z-10">
+              <div class="flex items-center gap-2 mb-3">
+                <span class="material-symbols-outlined text-[10px] text-primary">{{ track.icon || 'music_note' }}</span>
+                <span class="text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-primary">{{ track.genre }}</span>
+              </div>
+              
+              <h3 class="text-base font-bold mb-1 text-white line-clamp-2 leading-snug group-hover:text-primary-glow transition-colors duration-300">
+                {{ track.title }}
+              </h3>
+              <p class="text-[0.6875rem] text-muted mb-4 opacity-60">{{ track.author }}</p>
+              
+              <div class="flex items-center justify-between mt-auto">
+                <span class="text-[0.625rem] font-medium text-muted/60 bg-surface/40 backdrop-blur-md px-2 py-1 rounded-lg border border-white/5">
+                  Infinite Loop
+                </span>
+                <div class="w-10 h-10 rounded-full bg-primary-glow flex items-center justify-center shadow-[0_0_15px_rgba(75,142,255,0.4)] translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                  <span class="material-symbols-outlined text-void font-bold">play_arrow</span>
+                </div>
               </div>
             </div>
           </div>
@@ -231,7 +270,19 @@ const handleAddTrack = async () => {
     isSaving.value = false
   }
 }
+
+// Delete track
+const confirmDeleteId = ref<string | null>(null)
+
+const isPersonalTrack = (id: string) =>
+  musicStore.personalTracks.some(t => t.id === id)
+
+const handleDeleteTrack = async (id: string) => {
+  await musicStore.removeTrack(id)
+  confirmDeleteId.value = null
+}
 </script>
+
 
 <style scoped>
 /* No solid ghost borders — handled inline with Ghost Border pattern */

@@ -9,6 +9,42 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      user_settings: {
+        Row: {
+          user_id: string
+          focus_time: number
+          break_time: number
+          long_break_time: number
+          yt_video_id: string
+          volume: number
+          auto_play_focus: boolean
+          auto_pause_break: boolean
+          sound_enabled: boolean
+        }
+        Insert: {
+          user_id: string
+          focus_time?: number
+          break_time?: number
+          long_break_time?: number
+          yt_video_id?: string
+          volume?: number
+          auto_play_focus?: boolean
+          auto_pause_break?: boolean
+          sound_enabled?: boolean
+        }
+        Update: {
+          user_id?: string
+          focus_time?: number
+          break_time?: number
+          long_break_time?: number
+          yt_video_id?: string
+          volume?: number
+          auto_play_focus?: boolean
+          auto_pause_break?: boolean
+          sound_enabled?: boolean
+        }
+        Relationships: []
+      }
       pomo_sessions: {
         Row: {
           id: string

@@ -1,9 +1,19 @@
 <template>
   <div class="max-w-4xl mx-auto space-y-12 pt-8">
     <!-- Page Header -->
-    <header class="space-y-2">
-      <h1 class="text-3xl font-semibold tracking-tight text-white">System Configuration</h1>
-      <p class="text-sm text-muted uppercase tracking-widest font-medium">Tailor your deep focus experience</p>
+    <header class="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/5 pb-6">
+      <div class="space-y-2">
+        <h1 class="text-3xl font-semibold tracking-tight text-white">System Configuration</h1>
+        <p class="text-sm text-muted uppercase tracking-widest font-medium">Tailor your deep focus experience</p>
+      </div>
+      <div class="flex items-center gap-4">
+        <span v-if="saveSuccessMsg" class="text-green-400 text-xs font-medium bg-green-500/10 px-3 py-1.5 rounded-full">{{ saveSuccessMsg }}</span>
+        <button @click="saveSettings" :disabled="isSavingSettings" class="px-8 py-3 rounded-full bg-primary-glow text-void font-bold text-xs uppercase tracking-widest shadow-[0_0_20px_rgba(75,142,255,0.3)] hover:shadow-[0_0_30px_rgba(75,142,255,0.5)] transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2">
+          <span v-if="isSavingSettings" class="material-symbols-outlined animate-spin text-sm">progress_activity</span>
+          <span v-else class="material-symbols-outlined text-sm">save</span>
+          Save Changes
+        </button>
+      </div>
     </header>
     
     <!-- 1. Timer Settings -->
@@ -17,21 +27,21 @@
         <div class="space-y-4">
           <label class="text-[0.6875rem] uppercase tracking-[0.1em] font-medium text-muted block">Focus Duration</label>
           <div class="flex items-end gap-2 group border-b border-muted/20 focus-within:border-primary pb-1 transition-colors">
-            <input v-model="focusMins" min="1" max="180" class="bg-transparent border-none p-0 focus:ring-0 text-2xl font-semibold w-20 text-white" type="number"/>
+            <input v-model="settingsForm.focusMins" min="1" max="180" class="bg-transparent border-none p-0 focus:ring-0 text-2xl font-semibold w-20 text-white" type="number"/>
             <span class="text-sm text-muted pb-1">min</span>
           </div>
         </div>
         <div class="space-y-4">
           <label class="text-[0.6875rem] uppercase tracking-[0.1em] font-medium text-muted block">Short Break</label>
           <div class="flex items-end gap-2 group border-b border-muted/20 focus-within:border-primary pb-1 transition-colors">
-            <input v-model="shortMins" min="1" max="60" class="bg-transparent border-none p-0 focus:ring-0 text-2xl font-semibold w-20 text-white" type="number"/>
+            <input v-model="settingsForm.shortMins" min="1" max="60" class="bg-transparent border-none p-0 focus:ring-0 text-2xl font-semibold w-20 text-white" type="number"/>
             <span class="text-sm text-muted pb-1">min</span>
           </div>
         </div>
         <div class="space-y-4">
           <label class="text-[0.6875rem] uppercase tracking-[0.1em] font-medium text-muted block">Long Break</label>
           <div class="flex items-end gap-2 group border-b border-muted/20 focus-within:border-primary pb-1 transition-colors">
-            <input v-model="longMins" min="1" max="60" class="bg-transparent border-none p-0 focus:ring-0 text-2xl font-semibold w-20 text-white" type="number"/>
+            <input v-model="settingsForm.longMins" min="1" max="60" class="bg-transparent border-none p-0 focus:ring-0 text-2xl font-semibold w-20 text-white" type="number"/>
             <span class="text-sm text-muted pb-1">min</span>
           </div>
         </div>
@@ -50,7 +60,7 @@
           <div class="space-y-8">
             <div class="space-y-4">
               <label class="text-[0.6875rem] uppercase tracking-[0.1em] font-medium text-muted block">YouTube Base Link</label>
-              <input :value="currentYoutubeUrl" @change="handleDefaultAudioChange" class="w-full bg-surface-variant/40 border-[1px] border-muted/20 rounded-lg px-4 py-3 text-sm focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-muted/50 text-white" placeholder="https://youtube.com/..." type="text"/>
+              <input v-model="settingsForm.youtubeUrl" class="w-full bg-surface-variant/40 border-[1px] border-muted/20 rounded-lg px-4 py-3 text-sm focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-muted/50 text-white" placeholder="https://youtube.com/..." type="text"/>
             </div>
             <div class="flex items-center gap-4 text-muted">
               <span class="material-symbols-outlined">notifications</span>
@@ -59,32 +69,32 @@
                 <p class="text-[0.625rem] uppercase tracking-wide">Play audio cues and alert for sessions</p>
               </div>
               <!-- Checkbox Switch -->
-              <button @click="store.settings.soundEnabled = !store.settings.soundEnabled; store.settings.notificationsEnabled = !store.settings.notificationsEnabled" 
-                      :class="store.settings.soundEnabled ? 'bg-primary-glow shadow-[0_0_10px_rgba(75,142,255,0.4)]' : 'bg-surface-variant'" 
+              <button @click="settingsForm.soundEnabled = !settingsForm.soundEnabled" 
+                      :class="settingsForm.soundEnabled ? 'bg-primary-glow shadow-[0_0_10px_rgba(75,142,255,0.4)]' : 'bg-surface-variant'" 
                       class="w-10 h-5 rounded-full relative transition-colors">
-                <div :class="store.settings.soundEnabled ? 'right-1 bg-void' : 'left-1 bg-muted'" class="absolute top-1 w-3 h-3 rounded-full transition-all"></div>
+                <div :class="settingsForm.soundEnabled ? 'right-1 bg-void' : 'left-1 bg-muted'" class="absolute top-1 w-3 h-3 rounded-full transition-all"></div>
               </button>
             </div>
           </div>
           
           <div class="space-y-4 bg-void/30 p-4 rounded-xl ghost-border">
-            <div @click="audioStore.settings.autoPlayFocus = !audioStore.settings.autoPlayFocus" class="flex items-center justify-between p-3 rounded-lg hover:bg-surface-variant transition-colors cursor-pointer group">
+            <div @click="settingsForm.autoPlayFocus = !settingsForm.autoPlayFocus" class="flex items-center justify-between p-3 rounded-lg hover:bg-surface-variant transition-colors cursor-pointer group">
               <div class="flex flex-col">
                 <span class="text-sm font-medium text-white">Auto-play Focus Music</span>
                 <span class="text-[0.625rem] text-muted uppercase">Starts when timer begins</span>
               </div>
-              <button :class="audioStore.settings.autoPlayFocus ? 'bg-primary-glow shadow-[0_0_10px_rgba(75,142,255,0.4)]' : 'bg-surface-variant'" class="w-10 h-5 rounded-full relative transition-colors">
-                <div :class="audioStore.settings.autoPlayFocus ? 'right-1 bg-void' : 'left-1 bg-muted'" class="absolute top-1 w-3 h-3 rounded-full transition-all"></div>
+              <button :class="settingsForm.autoPlayFocus ? 'bg-primary-glow shadow-[0_0_10px_rgba(75,142,255,0.4)]' : 'bg-surface-variant'" class="w-10 h-5 rounded-full relative transition-colors">
+                <div :class="settingsForm.autoPlayFocus ? 'right-1 bg-void' : 'left-1 bg-muted'" class="absolute top-1 w-3 h-3 rounded-full transition-all"></div>
               </button>
             </div>
             
-            <div @click="audioStore.settings.autoPauseBreak = !audioStore.settings.autoPauseBreak" class="flex items-center justify-between p-3 rounded-lg hover:bg-surface-variant transition-colors cursor-pointer">
+            <div @click="settingsForm.autoPauseBreak = !settingsForm.autoPauseBreak" class="flex items-center justify-between p-3 rounded-lg hover:bg-surface-variant transition-colors cursor-pointer">
               <div class="flex flex-col">
                 <span class="text-sm font-medium text-white">Auto-pause on Break</span>
                 <span class="text-[0.625rem] text-muted uppercase">Silence during rest periods</span>
               </div>
-              <button :class="audioStore.settings.autoPauseBreak ? 'bg-primary-glow shadow-[0_0_10px_rgba(75,142,255,0.4)]' : 'bg-surface-variant'" class="w-10 h-5 rounded-full relative transition-colors">
-                <div :class="audioStore.settings.autoPauseBreak ? 'right-1 bg-void' : 'left-1 bg-muted'" class="absolute top-1 w-3 h-3 rounded-full transition-all"></div>
+              <button :class="settingsForm.autoPauseBreak ? 'bg-primary-glow shadow-[0_0_10px_rgba(75,142,255,0.4)]' : 'bg-surface-variant'" class="w-10 h-5 rounded-full relative transition-colors">
+                <div :class="settingsForm.autoPauseBreak ? 'right-1 bg-void' : 'left-1 bg-muted'" class="absolute top-1 w-3 h-3 rounded-full transition-all"></div>
               </button>
             </div>
           </div>
@@ -149,8 +159,9 @@
 import { useTimerStore } from '~/stores/useTimerStore'
 import { useAudioStore } from '~/stores/useAudioStore'
 import { useAuthStore } from '~/stores/useAuthStore'
+import { useSettingsSync } from '~/composables/useSettingsSync'
 import { useRouter } from 'vue-router'
-import { computed, ref } from 'vue'
+import { ref, reactive } from 'vue'
 
 const store = useTimerStore()
 const audioStore = useAudioStore()
@@ -161,6 +172,60 @@ const isEditingProfile = ref(false)
 const isSavingProfile = ref(false)
 const editNameInput = ref('')
 const profileErrorMsg = ref('')
+
+// LOCAL SETTINGS FORM STATE
+const settingsForm = reactive({
+  focusMins: Math.floor(store.settings.focusDuration / 60),
+  shortMins: Math.floor(store.settings.shortBreakDuration / 60),
+  longMins: Math.floor(store.settings.longBreakDuration / 60),
+  youtubeUrl: `https://www.youtube.com/watch?v=${audioStore.settings.defaultVideoId}`,
+  soundEnabled: store.settings.soundEnabled ?? true,
+  autoPlayFocus: audioStore.settings.autoPlayFocus,
+  autoPauseBreak: audioStore.settings.autoPauseBreak,
+})
+
+const isSavingSettings = ref(false)
+const saveSuccessMsg = ref('')
+
+const saveSettings = async () => {
+  isSavingSettings.value = true
+  saveSuccessMsg.value = ''
+  
+  // Timer attributes
+  store.settings.focusDuration = settingsForm.focusMins * 60
+  store.settings.shortBreakDuration = settingsForm.shortMins * 60
+  store.settings.longBreakDuration = settingsForm.longMins * 60
+  store.settings.soundEnabled = settingsForm.soundEnabled
+  // Legacy alias mapping:
+  store.settings.notificationsEnabled = settingsForm.soundEnabled
+  
+  // Extract Youtube ID
+  const extractVideoId = (input: string) => {
+    if (input.length === 11 && !input.includes('/')) return input
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
+    const match = input.match(regExp)
+    return (match && match[2] && match[2].length === 11) ? match[2] : null
+  }
+  const vid = extractVideoId(settingsForm.youtubeUrl)
+  if (vid) {
+    audioStore.setDefaultTrack(vid)
+  }
+  
+  // Audio attributes
+  audioStore.settings.autoPlayFocus = settingsForm.autoPlayFocus
+  audioStore.settings.autoPauseBreak = settingsForm.autoPauseBreak
+  
+  // Force Explicit DB Sync
+  const { saveSettings: syncToDb } = useSettingsSync()
+  await syncToDb()
+  
+  // Allow UI to animate loading state comfortably
+  await new Promise(r => setTimeout(r, 600))
+  
+  isSavingSettings.value = false
+  saveSuccessMsg.value = 'Settings Saved!'
+  setTimeout(() => saveSuccessMsg.value = '', 3000)
+}
 
 const startEditingProfile = () => {
   editNameInput.value = authStore.user?.user_metadata?.full_name || ''
@@ -195,29 +260,4 @@ const handleLogout = async () => {
     console.error(e)
   }
 }
-
-// Biến ảo giúp đồng bộ Pinia store (tính theo giây) ra View (tính theo phút)
-const focusMins = computed({
-  get: () => Math.floor(store.settings.focusDuration / 60),
-  set: (val) => { store.settings.focusDuration = val * 60 }
-})
-
-const shortMins = computed({
-  get: () => Math.floor(store.settings.shortBreakDuration / 60),
-  set: (val) => { store.settings.shortBreakDuration = val * 60 }
-})
-
-const longMins = computed({
-  get: () => Math.floor(store.settings.longBreakDuration / 60),
-  set: (val) => { store.settings.longBreakDuration = val * 60 }
-})
-
-const handleDefaultAudioChange = (event: any) => {
-  const url = event.target.value
-  audioStore.setDefaultTrack(url)
-}
-
-const currentYoutubeUrl = computed(() => {
-  return `https://www.youtube.com/watch?v=${audioStore.settings.defaultVideoId}`
-})
 </script>

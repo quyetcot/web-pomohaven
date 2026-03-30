@@ -1,60 +1,90 @@
 ---
 trigger: always_on
 glob: "**/*.{js,ts,vue,css,html,md}"
-description: PomoHaven Project Code Conventions and Standards
+description: PomoHaven Production Rules & Standards — v5.0
 ---
 
-# PomoHaven Production Rules & Standards (v4.0)
+# PomoHaven Production Rules & Standards (v5.0)
 
-Quá trình lập trình và maintain dự án này PHẢI tuân thủ tuyệt đối các nguyên tắc sau đây để giữ quy trình chuyên nghiệp:
+Quá trình lập trình và maintain dự án này PHẢI tuân thủ tuyệt đối các nguyên tắc sau đây.
 
-## 1. Kiến trúc & Công nghệ (Tech Stack constraints)
-- **Framework**: Bắt buộc dùng Nuxt 4. Tính năng thư mục gốc của Nuxt 3 đã BỊ LOẠI BỎ. Tất cả các file mã nguồn (ngoại trừ cấu hình) đều **phải được đặt trong thư mục `app/`** (bao gồm `pages/`, `components/`, `layouts/`, `assets/`, và `app.vue`).
-- **Styling**: Chỉ sử dụng Tailwind CSS. KHÔNG tạo thêm các file CSS/SCSS Custom nếu có thể giải quyết bằng Tailwind Utilities `@apply`. Lưu ý đường dẫn Tailwind bắt buộc trỏ vào `./app/...`.
-- **Global State**: Quản lý bằng `Pinia`. Luôn tích hợp `@vueuse/nuxt` (đặc biệt là `useLocalStorage`) để lưu biến persist.
-- **Icons**: Sử dụng Material Symbols Outlined (Font size fix ở 20px hoặc 24px).
+---
 
-## 2. Tiêu chuẩn Mã nguồn (Vue 3 / Nuxt 3 Patterns)
-- **Composition API**: Luôn sử dụng `<script setup>` cho tất cả các Vue components. Không sử dụng Options API.
-- **TypeScript**: Khuyến khích sử dụng `lang="ts"` để tăng tính ổn định của object và data model (VD: Payload API hoặc Settings Object).
-- **Props & Emits**: Bắt buộc phải khai báo bằng các macro `defineProps` và `defineEmits`. Sử dụng `withDefaults` nếu có props tuỳ chọn.
-- **Auto-imports**: Tận dụng triệt để tính năng auto-imports của Nuxt cho components, composables, và Pinia stores.
+## 1. Kiến trúc & Công nghệ (Tech Stack)
+
+- **Framework**: Nuxt 4. Tất cả source code **phải đặt trong `app/`** (`pages/`, `components/`, `layouts/`, `assets/`, `app.vue`). Không được đặt ở thư mục gốc.
+- **Styling**: Chỉ dùng Tailwind CSS. KHÔNG tạo file CSS custom nếu có thể dùng `@apply`. Tailwind config phải quét `./app/**/*.vue`.
+- **Global State**: Pinia + `@vueuse/nuxt` (`useLocalStorage` cho persistence).
+- **Backend**: Supabase (PostgreSQL + Auth). Dùng composable `useSupabase()` — không import Supabase client trực tiếp vào component.
+- **Icons**: Material Symbols Outlined, kích thước cố định 20px hoặc 24px.
+
+---
+
+## 2. Tiêu chuẩn Mã nguồn (Vue 3 / Nuxt 4)
+
+- **Composition API**: Luôn dùng `<script setup lang="ts">`. Không dùng Options API.
+- **Props & Emits**: Bắt buộc khai báo bằng `defineProps` / `defineEmits`. Dùng `withDefaults` nếu có props tùy chọn.
+- **Auto-imports**: Tận dụng triệt để — components, composables, Pinia stores đều được auto-import.
+- **SSR Safety**: Code dùng `window`, `document`, `navigator` PHẢI nằm trong `onMounted()` hoặc có guard `typeof window !== 'undefined'`.
+
+---
 
 ## 3. Quy chuẩn Đặt tên (Naming Conventions)
-- **Components (`components/`)**: Bắt buộc dùng `PascalCase`.
-  - Prefix `Base` cho các thành phần UI nguyên tử (VD: `BaseButton.vue`, `BaseSlider.vue`).
-  - Prefix theo Feature cho tính năng lớn (VD: `FocusTimerOrb.vue`, `AudioPlayer.vue`).
-  - Prefix `The` cho các thành phần chỉ xuất hiện 1 lần duy nhất (VD: `TheSidebar.vue`, `TheHeader.vue`).
-- **Composables (`composables/`)**: Bắt buộc bắt đầu bằng chữ `use` theo `camelCase` (VD: `useTimerState.ts`, `useAudioController.ts`).
-- **Store (`stores/`)**: Bắt buộc bắt đầu bằng `use` và hậu tố `Store` (VD: `useTimerStore.js`).
+
+- **Components**: `PascalCase`.
+  - `Base` prefix → UI nguyên tử: `BaseButton.vue`, `BaseSlider.vue`.
+  - Feature prefix → tính năng cụ thể: `FocusTimerOrb.vue`, `AudioSanctuaryWidget.vue`.
+  - `The` prefix → singleton (chỉ xuất hiện 1 lần): `TheSidebar.vue`, `TheHeader.vue`.
+- **Composables**: `camelCase` bắt đầu bằng `use`: `useTimerState.ts`, `useAudioController.ts`.
+- **Stores**: `camelCase` bắt đầu bằng `use`, hậu tố `Store`: `useTimerStore.ts`, `useMusicStore.ts`.
+
+---
 
 ## 4. Ràng buộc Thiết kế (The Deep Focus Sanctuary)
-> **⚠️ BẮT BUỘC ĐỐI VỚI AI AGENT:** Trước khi viết code HTML/Tailwind cho lưới giao diện, hãy LUÔN luôn sử dụng tool `view_file` để đọc chi tiết các thông số (Ghost Border, Glow, Tonal) trong tệp chuyên sâu: `d:\Projects\web-pomorodo\.agents\skills\pomo-design\SKILL.md`.
-- **Glassmorphism**: Bất cứ Panel nổi nào cũng phải tuân thủ bộ đôi: nền `surface-container` (kèm độ mờ opacity, tối đa 60%) + hiệu ứng `backdrop-filter: blur(20px)`.
-- **Colors**: Sử dụng trực tiếp class màu được thiết lập từ `srs.md` (VD: `bg-surface`, `text-primary`). Tuyệt đối không hardcode mã Hex/RGB trực tiếp vào class HTML.
-- **Borders**: Tuân thủ luật "No Solid Borders" (Không dùng viền đặc 1px). Bất kỳ section nào phân cách với nhau cũng dùng `Tonal Depth` (màu nền chênh lệch) hoặc Ghost Border (Gradient 15%).
 
-## 5. Quy chuẩn Testing & Performance
-- **Testing**: Bắt buộc có test coverage (hiện tại sẽ cấu hình với Vitest).
-- **DOM Rendering**: Sử dụng `v-show` cho những element đóng/mở tần suất cao (vd: dropdown, tooltip). Sử dụng `v-if` khi element chứa nội dung có thể nặng/kéo dài (như danh sách API).
-- **Accessibility (a11y)**: Bất kỳ nút (`<button>`, `<a>`) nào chỉ chứa Icon mà KHÔNG có text đi kèm thì BẮT BUỘC phải có `aria-label`. (VD: `<button aria-label="Play Music"><span class="material-symbols-outlined">play_arrow</span></button>`).
+> **⚠️ BẮT BUỘC:** Trước khi viết HTML/Tailwind cho bất kỳ UI nào, PHẢI đọc `d:\Projects\web-pomorodo\.agents\skills\pomo-design\SKILL.md`.
 
-## 6. Tính Nhất quán Thuật ngữ (Terminology Enforcement)
-Bất cứ khi nào tạo UI Label tĩnh, thông báo ứng dụng, hay đặt tên biến, hãy sử dụng hệ thống từ vựng sau:
-- Dashboard -> **Focus Dashboard**
-- Music/YouTube/Audio -> **Audio Sanctuary**
-- Stats/History/Analytics -> **Performance Analytics**
-- Settings/Config -> **System Configuration**
-- Break -> **Rest Period**
+- **Glassmorphism**: Panel nổi = nền `bg-[#272a31]/60` + `backdrop-blur-[24px]`.
+- **Ghost Border**: Không dùng `border-solid`. Dùng `border-t border-l border-[#adc6ff]/10` (chỉ phát sáng cạnh trên-trái).
+- **Colors**: Dùng design tokens Tailwind (`bg-surface`, `text-primary`). **Tuyệt đối không hardcode hex/RGB trong class HTML.**
+- **Tonal Depth**: Phân tách section bằng màu nền chênh lệch — không dùng `<hr>` hay border đặc.
 
-## 7. Quy Trình Phát Triển An Toàn (Anti-Bug Development Process)
+---
 
-> **⚠️ BẮT BUỘC:** Mỗi khi user yêu cầu một tính năng mới, AI Agent PHẢI áp dụng quy trình tại `d:\Projects\web-pomorodo\.agents\workflows\add-feature.md`.
+## 5. Supabase & Data Safety
 
-Các ràng buộc code cứng để tránh bug:
+- **Store-First**: Mọi Supabase call phải đi qua Pinia Store. Component không gọi Supabase trực tiếp.
+- **Error Handling**: Luôn destructure `{ data, error }` từ mọi Supabase call. Không bỏ qua `error` im lặng.
+- **ensureProfile**: Khi user đăng nhập, `useAuthStore.ensureProfile()` được gọi tự động để upsert `profiles` + `user_settings`.
+- **RLS Compliance**: Mọi bảng đều bật RLS. Đảm bảo có policy INSERT + SELECT + UPDATE cho mỗi table trước khi write code.
+- **Logout Cleanup**: Khi logout, bắt buộc clear localStorage (`resetStore`, `clearAllData`) để bảo vệ privacy.
 
-- **SSR Safety**: Tất cả code sử dụng `window`, `document`, `navigator` phải nằm trong `onMounted()` hoặc có kiểm tra `typeof window !== 'undefined'`.
-- **Event Isolation**: Khi dùng Drag & Drop (useDraggable), bắt buộc phải dùng `onStart` filter để loại trừ các phần tử tương tác (`input`, `button`, `a`) khỏi việc kích hoạt drag.
-- **Store-First**: Logic nghiệp vụ (business logic) PHẢI đặt trong Pinia Store. Component chỉ được bind template và gọi action.
-- **Không xóa code đang hoạt động**: Khi thêm tính năng mới, không xóa code cũ cho đến khi đã xác nhận tính năng mới hoạt động.
-- **Self-QA bắt buộc**: Sau khi code xong, AI Agent phải dùng Browser Agent để tự test trước khi báo cáo "Xong" với user.
+---
+
+## 6. Quy chuẩn Testing & Performance
+
+- **v-show vs v-if**: `v-show` cho element toggle tần suất cao (dropdown, tooltip). `v-if` cho content nặng hoặc data từ API.
+- **Accessibility (a11y)**: `<button>` / `<a>` chỉ chứa icon PHẢI có `aria-label`. Ví dụ: `<button aria-label="Play Music">`.
+
+---
+
+## 7. Tính Nhất quán Thuật ngữ (Terminology)
+
+| Tránh dùng | Dùng thay thế |
+| :--- | :--- |
+| Dashboard | **Focus Dashboard** |
+| Music / YouTube / Audio | **Audio Sanctuary** |
+| Stats / History / Analytics | **Performance Analytics** |
+| Settings / Config | **System Configuration** |
+| Break | **Rest Period** |
+
+---
+
+## 8. Quy Trình Phát Triển An Toàn
+
+> **⚠️ BẮT BUỘC:** Mỗi khi user yêu cầu tính năng mới, PHẢI áp dụng quy trình tại `.agents/workflows/add-feature.md`.
+
+- **Store-First**: Logic nghiệp vụ đặt trong Store. Component chỉ bind template và gọi action.
+- **Không xóa code cũ khi thêm mới**: Comment tạm thay vì xóa, cho đến khi feature mới hoạt động ổn định.
+- **Self-QA bắt buộc**: Sau khi code xong, dùng Browser Agent tự test trước khi báo cáo "Xong".
+- **Event Isolation**: Khi dùng Drag & Drop (`useDraggable`), dùng `onStart` filter để loại trừ `input`, `button`, `a`.
