@@ -13,8 +13,8 @@ export default defineEventHandler(async (event) => {
   }
 
   const supabase = createClient(
-    process.env.SUPABASE_URL || 'https://gmmswfopjusuyixaeiqk.supabase.co',
-    process.env.SUPABASE_KEY || 'sb_publishable_KQQGl39WB7sAPlF3r_9uJQ_UmQTP8Wg'
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_KEY!
   )
   
   const user = { id: userId }

@@ -41,6 +41,6 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
 
   pinia: {
-    storesDirs: ['./stores/**'],
+    storesDirs: ['./app/stores/**'],
   }
 })

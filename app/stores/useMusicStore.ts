@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
 import { useLocalStorage } from '@vueuse/core'
+import { useAuthStore } from './useAuthStore'
+import { useSupabase } from '~/composables/useSupabase'
 
 export interface Track {
   id: string
@@ -71,8 +71,37 @@ export const useMusicStore = defineStore('music', () => {
   // Computed
   const library = computed(() => [...defaultLibrary, ...personalTracks.value])
 
-  // Actions
+  const supabase = useSupabase()
+  const authStore = useAuthStore()
+
+  // Sync Actions
+  const loadPersonalTracks = async () => {
+    if (!authStore.user) return
+    const { data } = await (supabase.from('personal_tracks') as any)
+      .select('*')
+      .eq('user_id', authStore.user.id)
+    
+    if (data) {
+      personalTracks.value = data.map((t: any) => ({
+        id: t.yt_video_id,
+        name: t.name,
+        title: t.name,
+        author: 'Personal Collection',
+        genre: t.genre || 'Personal',
+        icon: 'music_note'
+      }))
+    }
+  }
+
+  /* 
+  // OLD LOGIC: Local-only tracks
   const addTrack = (id: string, name: string, genre: string) => {
+    personalTracks.value.push({ id, name, title: name, author: 'Personal', genre })
+  }
+  */
+
+  // Actions
+  const addTrack = async (id: string, name: string, genre: string) => {
     // Avoid duplicates
     if (personalTracks.value.some(t => t.id === id) || defaultLibrary.some(t => t.id === id)) {
       return
@@ -81,17 +110,44 @@ export const useMusicStore = defineStore('music', () => {
     const newTrack: Track = {
       id,
       name,
-      title: name, // Default title to name
-      author: 'Personal Collection',
+      title: name,
+      author: 'Personal Sanctuary',
       genre: genre || 'Personal',
       icon: 'music_note'
     }
 
     personalTracks.value.push(newTrack)
+
+    // Sync to DB if user is logged in
+    if (authStore.user) {
+      const { error } = await (supabase.from('personal_tracks') as any).insert({
+        user_id: authStore.user.id,
+        yt_video_id: id,
+        name,
+        genre: genre || 'Personal'
+      })
+
+      if (error) {
+        // Rollback local insert on DB failure
+        personalTracks.value = personalTracks.value.filter(t => t.id !== id)
+        console.error('[MusicStore] Failed to save track to DB:', error.message, error)
+        throw new Error(error.message)
+      }
+    }
   }
 
-  const removeTrack = (id: string) => {
+  const removeTrack = async (id: string) => {
+    /* 
+    // OLD LOGIC: personalTracks.value = personalTracks.value.filter(t => t.id !== id)
+    */
     personalTracks.value = personalTracks.value.filter(t => t.id !== id)
+    
+    if (authStore.user) {
+      await (supabase.from('personal_tracks') as any)
+        .delete()
+        .eq('user_id', authStore.user.id)
+        .eq('yt_video_id', id)
+    }
   }
 
   const getTracksByGenre = (genre: string) => {
@@ -107,13 +163,19 @@ export const useMusicStore = defineStore('music', () => {
     return [...curated, ...personalTracks.value]
   }
 
+  const resetStore = () => {
+    personalTracks.value = []
+  }
+
   return {
     library,
     personalTracks,
     genres,
+    loadPersonalTracks,
     addTrack,
     removeTrack,
     getTracksByGenre,
-    getFeaturedTracks
+    getFeaturedTracks,
+    resetStore
   }
 })
