@@ -4,7 +4,26 @@
   </NuxtLayout>
 </template>
 
+
 <script setup>
+import { onMounted } from 'vue'
+import { useAuthStore } from '~/stores/useAuthStore'
+import { useMusicStore } from '~/stores/useMusicStore'
+
+const authStore = useAuthStore()
+
+onMounted(async () => {
+  await authStore.initAuthSession()
+  
+  // Sync Settings
+  const { loadSettings } = useSettingsSync()
+  loadSettings()
+
+  // Sync Music
+  const musicStore = useMusicStore()
+  musicStore.loadPersonalTracks()
+})
+
 useSeoMeta({
   title: 'PomoHaven - The Deep Focus Sanctuary',
   ogTitle: 'PomoHaven - The Deep Focus Sanctuary',

@@ -20,7 +20,7 @@
     </div>
 
     <!-- Data Dashboard -->
-    <div v-else class="space-y-8">
+    <div v-else-if="data?.success" class="space-y-8">
       
       <!-- Top Metrics Grid -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -209,15 +209,13 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useAuthStore } from '~/stores/useAuthStore'
 
 useHead({
   title: 'Performance Analytics'
 })
 
-const authStore = useAuthStore()
 // Fetch Analytics Data
-const { data, pending, error } = await useFetch(() => authStore.user ? `/api/analytics/dashboard?userId=${authStore.user.id}` : null)
+const { data, pending, error } = await useFetch('/api/analytics/dashboard')
 
 // Compute aggregated values
 const averageFQS = computed(() => {
