@@ -1,7 +1,7 @@
 <template>
   <div class="bg-surface-container/60 backdrop-blur-3xl rounded-3xl p-8 space-y-6 w-full relative overflow-hidden">
-    <!-- Ghost Border -->
-    <div class="absolute inset-0 border-t border-l border-white/10 rounded-3xl pointer-events-none"></div>
+    <!-- Ghost Border: top-left light path (PomoDesign standard) -->
+    <div class="absolute inset-0 border-t border-l border-accent-soft/10 rounded-3xl pointer-events-none"></div>
 
     <div class="flex justify-between items-center">
       <div>
@@ -45,7 +45,7 @@
           <h4 class="text-xl md:text-2xl font-bold text-white tracking-tight leading-tight">
             {{ audioStore.currentTitle }}
           </h4>
-          <p class="text-sm text-muted font-medium">Channel: {{ audioStore.currentAuthor }}</p>
+          <p class="text-sm text-muted font-medium">{{ audioStore.currentAuthor || 'Aural Sanctuary' }}</p>
         </div>
       </div>
       

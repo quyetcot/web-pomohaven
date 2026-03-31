@@ -1,38 +1,115 @@
-# PomoTune Project State & Development Log
-*Tệp này là bộ nhớ cốt lõi (Core Memory) của Agent. Đọc tệp này để khôi phục toàn bộ bối cảnh dự án thay vì quét lại toàn bộ mã nguồn.*
+# PomoHaven — Project State & Development Log
+*Tệp này là bộ nhớ cốt lõi (Core Memory) của AI Agent. Đọc tệp này để khôi phục toàn bộ bối cảnh dự án thay vì quét lại toàn bộ mã nguồn.*
+
+---
 
 ## 1. Trạng thái Dự án (Current Status)
-- **Giai đoạn hiện tại:** Đang hoàn thiện Thiết lập Music Integration & Analytics cơ bản (Phase 4).
-- **Tiến độ (Progress):**
-  - [x] Đã chốt yêu cầu phần mềm (SRS.md).
-  - [x] Đã hoàn thành Mockup HTML tĩnh (demo, library, settings, analytics).
-  - [x] Đã xây dựng Khung bộ quy tắc AI (Rules, Workflows, Skills).
-  - [x] Khởi tạo dự án Nuxt 3 & Cấu hình môi trường.
-  - [x] Phân rã Layout cơ bản (Header, Sidebar, MobileNav).
-  - [x] Xây dựng Atoms/Molecules (TimerOrb, Buttons, Slider).
-  - [x] Thiết lập Pinia Store & State Management.
 
-## 2. Quyết định Kiến trúc & Công nghệ (Architecture Decisions)
-- **Frontend Stack:** Vue 3 / Nuxt 3 (Universal Rendering) + Tailwind CSS.
-- **State Management:** Pinia + `@vueuse/nuxt` (Lưu LocalStorage).
-- **Design System:** "The Deep Focus Sanctuary" (Glassmorphism, Tonal Stacking, Ghost Borders). Màu chủ đạo: Deep Blue (`#10131a`, `#adc6ff`).
-- **Danh mục Thuật ngữ (Terminology):** Dashboard -> `Focus Dashboard`, Library/Music -> `Audio Sanctuary`, Stats -> `Performance Analytics`, Settings -> `System Configuration`.
+- **Giai đoạn hiện tại:** Phase 6 — Production Integration & Feature Refinement.
+- **Branch hiện tại:** `feat/supabase-sync-integration`
 
-## 3. Hệ thống Cấu hình AI (AI Agent Configuration)
-Dự án được mã hóa với một bộ não AI mạnh mẽ trong thư mục `.agents`:
-- **Rules (`.agents/rules/project-rules.md`):** Các rào cản kỹ thuật buộc AI phải tuân thủ khi viết code (Component API, A11y, Naming conventions).
-- **Workflows (`.agents/workflows/html-to-nuxt.md`):** Lộ trình 5 bước phát triển từ HTML tĩnh lên web động bảo mật cao, chống lỗi vặt.
-- **Skills (`.agents/skills/pomo-design/SKILL.md`):** Cẩm nang biến AI thành Master Designer, kiểm soát Shadow, Blur, và Typography kiến trúc.
+### Tiến độ (Progress Checklist)
+- [x] Chốt yêu cầu phần mềm (`document/srs.md`).
+- [x] Hoàn thành Mockup HTML tĩnh (demo, library, settings, analytics).
+- [x] Xây dựng hệ thống AI Agent (Rules, Workflows, Skills).
+- [x] Khởi tạo dự án Nuxt 4 & cấu hình môi trường (Tailwind, Pinia, VueUse).
+- [x] Layout cơ bản: `TheSidebar`, `TheHeader`, `TheMobileNav`.
+- [x] Base Components: `FocusTimerOrb`, `BaseButton`, `BaseSlider`.
+- [x] Pinia Stores: `useTimerStore`, `useAudioStore`, `useMusicStore`, `useAuthStore`.
+- [x] Tất cả pages: `index.vue`, `library.vue`, `analytics.vue`, `settings.vue`, `auth.vue`.
+- [x] Tích hợp Supabase Auth (Google OAuth).
+- [x] Đồng bộ Supabase DB: `profiles`, `user_settings`, `personal_tracks`, `pomo_sessions`.
+- [x] Chuyển "Add Personal Track" từ Dashboard sang Library page.
+- [x] Dashboard AudioSanctuaryWidget → UI đơn giản (chỉ còn URL input).
+- [x] Fix `ensureProfile` — tự tạo profile khi Google OAuth login.
+- [x] Fix silent error trong `addTrack` → hiện lỗi rõ ràng cho user.
+- [x] Push code lên Git.
+- [ ] Viết Vitest unit tests cho `useTimerStore`.
+- [ ] Performance Analytics (`analytics.vue`) — verify chart data từ `pomo_sessions`.
+- [ ] Deploy lên Vercel/Netlify với env vars.
 
-## 4. Nhật ký Thay đổi (Changelog)
-- **[23/03/2026]**: Hoàn thành Giai đoạn 5 (Logic Phụ & Tối ưu). Đã chuyển hóa toàn bộ các bản thiết kế mockup (`settings.html`, `library.html`, `analytics.html`, `sessions.vue`) sang các file `*.vue` trong `app/pages/`. Tích hợp trạm phát nhạc ẩn toàn cầu (`ContextualPlayer`) vào layout gốc. Mọi components đều tuân thủ Glassmorphism và kiến trúc mã nguồn chuẩn Nuxt 4.
-- **[23/03/2026]**: Hoàn thiện Phase 4 (Assembly). Lắp ghép `<AudioSanctuaryWidget>`, `<HistoryWidget>`, `<StatsWidget>` vào `index.vue`. Khởi tạo `useAudioStore` hỗ trợ gắn mã YouTube linh hoạt.
-- **[23/03/2026]**: Xây dựng Giai đoạn 3 (State & Molecules). Khởi tạo `useTimerStore` ứng dụng VueUse `useLocalStorage` và `useDocumentVisibility` để chống trôi timer. Đóng gói hoàn chỉnh SVG Component `<FocusTimerOrb>`.
-- **[23/03/2026]**: Xé nhỏ HTML tĩnh thành Vue Components (Giai đoạn 2). Khởi tạo `TheHeader`, `TheSidebar`, `TheMobileNav`. Thiết lập đủ hệ thống `pages/` (Index, Sessions, Library, Analytics, Settings, Auth).
-- **[23/03/2026]**: Khởi tạo nền tảng (Phase 1). Cài đặt Nuxt 3, cấu hình Tailwind CSS theo `SKILL.md`, thiết lập Pinia, VueUse.
-- **[23/03/2026]**: Tái cấu trúc SRS, đồng bộ hóa thuật ngữ HTML, xây dựng hệ thống `Rules`, `Workflows` và `Skills` cho quy trình sản xuất Nuxt 3 chuyên nghiệp.
+---
 
-## 5. Các bước tiếp theo (Next Steps)
-1. Tách các file HTML tĩnh từ thư mục `design/` thành các trang `pages/*.vue` và các thành phần `components/*.vue`.
-2. Tạo cấu trúc Layout chung (`layouts/default.vue`).
-3. Khởi tạo `stores/` với Pinia.
+## 2. Kiến trúc & Công nghệ (Architecture)
+
+| Layer | Tech | Ghi chú |
+| :--- | :--- | :--- |
+| **Framework** | Nuxt 4 | Tất cả source trong `app/` |
+| **Styling** | Tailwind CSS 3 | Config quét `./app/**/*.vue` |
+| **State** | Pinia + `@vueuse/nuxt` | `useLocalStorage` cho persist |
+| **Backend** | Supabase (PostgreSQL) | Auth + Realtime Sync |
+| **Icons** | Material Symbols Outlined | 20px / 24px fixed |
+| **Design** | "Deep Focus Sanctuary" | Glassmorphism + Ghost Border |
+
+### Cấu hình Supabase (`.env`)
+```
+SUPABASE_URL=https://[project].supabase.co
+SUPABASE_KEY=[anon-public-key]
+```
+
+### Schema DB (tóm tắt)
+- `profiles(id, email, display_name, avatar_url)` — FK → `auth.users`
+- `user_settings(user_id, focus_duration, yt_video_id, volume, ...)` — FK → `profiles`
+- `personal_tracks(id, user_id, yt_video_id, name, genre)` — FK → `auth.users` *(đã fix)*
+- `pomo_sessions(id, user_id, type, duration, created_at)`
+
+> ⚠️ **RLS Policies:** `personal_tracks` và `profiles` đều có RLS bật. `profiles` cần cả INSERT + UPDATE policy cho mỗi user.
+
+---
+
+## 3. Cấu hình AI Agent (`.agents/`)
+
+| File | Mục đích |
+| :--- | :--- |
+| `rules/project-rules.md` | Rules luôn hoạt động — conventions, naming, design constraints |
+| `workflows/add-feature.md` | Quy trình 5 bước thêm tính năng an toàn |
+| `workflows/html-to-nuxt.md` | Quy trình chuyển đổi mockup HTML → Nuxt |
+| `skills/pomo-design/SKILL.md` | Design system "Deep Focus Sanctuary" |
+
+---
+
+## 4. Cấu trúc Thư mục Chính (Key Files)
+
+```
+app/
+├── pages/
+│   ├── index.vue          # Focus Dashboard
+│   ├── library.vue        # Audio Sanctuary (có Add Personal Track)
+│   ├── analytics.vue      # Performance Analytics
+│   ├── settings.vue       # System Configuration
+│   └── auth.vue           # Google OAuth login
+├── components/
+│   ├── audio/
+│   │   ├── AudioSanctuaryWidget.vue  # Dashboard widget (URL input only)
+│   │   └── ContextualPlayer.vue      # Global floating player
+│   └── focus/
+│       └── FocusTimerOrb.vue
+├── stores/
+│   ├── useAuthStore.ts    # Auth + ensureProfile()
+│   ├── useTimerStore.ts   # Timer logic + pomo_sessions sync
+│   ├── useAudioStore.ts   # YouTube player state
+│   └── useMusicStore.ts   # Library + personal_tracks sync
+└── composables/
+    └── useSupabase.ts
+```
+
+---
+
+## 5. Changelog
+
+- **[30/03/2026]**: Refactor Settings form (Save button, explicit Supabase sync for new columns), fix ContextualPlayer auto-play bug, and add Personal Track deletion feature in Library.
+- **[30/03/2026]**: Chuẩn hóa `.agents/` và `PROJECT_STATE.md` theo chuẩn Antigravity.
+- **[26/03/2026]**: Fix `ensureProfile()` trong `useAuthStore` — tự tạo profiles + user_settings khi Google OAuth login. Fix foreign key `personal_tracks.user_id` → `auth.users`. Fix silent error trong `addTrack`.
+- **[26/03/2026]**: Chuyển "Add Personal Track" form từ `AudioSanctuaryWidget` (Dashboard) sang `library.vue`. Dashboard widget giản lược thành URL input thuần.
+- **[26/03/2026]**: Tích hợp Supabase hoàn chỉnh — Google OAuth, sync cài đặt, personal tracks lên DB, clear data khi logout.
+- **[25/03/2026]**: Tích hợp âm nhạc đồng bộ với Pomodoro timer (tự play khi focus, pause khi break).
+- **[23/03/2026]**: Hoàn thành toàn bộ pages (`settings.vue`, `library.vue`, `analytics.vue`, `sessions.vue`). Tích hợp `ContextualPlayer` global.
+
+---
+
+## 6. Các bước tiếp theo (Next Steps)
+
+1. **Push code:** Tạo nhánh `feat/supabase-sync-integration` và push lên remote.
+2. **Analytics:** Verify `analytics.vue` hiển thị đúng dữ liệu từ bảng `pomo_sessions`.
+3. **Testing:** Viết Vitest tests cho `useTimerStore` (timer logic, anti-drift).
+4. **Deploy:** Cấu hình env vars trên Vercel, test OAuth callback URL.

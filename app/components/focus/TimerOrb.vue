@@ -21,8 +21,7 @@
 
     <!-- The Focus Orb -->
     <div @click="store.toggle()" class="relative group cursor-pointer mt-4 select-none">
-      <div class="w-80 h-80 md:w-96 md:h-96 rounded-full border-[6px] border-surface-floating flex items-center justify-center relative shadow-[0_0_100px_rgba(75,142,255,0.1)] transition-all duration-700 group-hover:shadow-[0_0_120px_rgba(75,142,255,0.15)] overflow-hidden" 
-           style="background: radial-gradient(circle at center, rgba(75, 142, 255, 0.05) 0%, transparent 70%);">
+      <div class="w-80 h-80 md:w-96 md:h-96 rounded-full border-[6px] border-surface-floating flex items-center justify-center relative shadow-[0_0_100px_rgba(75,142,255,0.1)] transition-all duration-700 group-hover:shadow-[0_0_120px_rgba(75,142,255,0.15)] overflow-hidden orb-glow">
         
         <!-- SVG Progress Ring -->
         <svg class="absolute inset-0 w-full h-full -rotate-90 pointer-events-none">
@@ -34,8 +33,8 @@
                   class="transition-all duration-1000 ease-linear"></circle>
           <defs>
             <linearGradient id="timerGradient" x1="0%" x2="100%" y1="0%" y2="0%">
-              <stop offset="0%" stop-color="#adc6ff"></stop>
-              <stop offset="100%" stop-color="#4b8eff"></stop>
+              <stop offset="0%" stop-color="var(--color-accent-soft, #adc6ff)"></stop>
+              <stop offset="100%" stop-color="var(--color-accent, #4b8eff)"></stop>
             </linearGradient>
           </defs>
         </svg>
@@ -135,6 +134,11 @@ const handleCustomSet = () => {
 /* Force smooth dashoffset animation */
 circle {
   transition: stroke-dashoffset 1s linear;
+}
+
+/* Orb radial glow — replaces inline style */
+.orb-glow {
+  background: radial-gradient(circle at center, rgba(75, 142, 255, 0.06) 0%, transparent 70%);
 }
 
 /* Chrome, Safari, Edge, Opera - Remove arrows for number input */

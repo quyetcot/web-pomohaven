@@ -4,82 +4,80 @@ description: Quy trình thêm một tính năng mới vào PomoHaven một cách
 
 # /add-feature — Quy Trình Phát Triển Tính Năng An Toàn
 
-Quy trình này phải được tuân thủ MỖI KHI user yêu cầu thêm một tính năng mới, không phân biệt tính năng lớn hay nhỏ.
+Quy trình này PHẢI được tuân thủ mỗi khi user yêu cầu thêm tính năng mới, không phân biệt lớn hay nhỏ.
 
 ---
 
-## BƯỚC 1: Đọc & Hiểu Yêu Cầu (Read & Clarify)
+## BƯỚC 1: Đọc & Hiểu Yêu Cầu
 
-Trước khi viết bất kỳ dòng code nào, AI Agent phải:
+Trước khi viết bất kỳ dòng code nào:
 
-1.1. **Đọc lại các file liên quan** để hiểu trạng thái hiện tại của code:
-   - Đọc file Component/Store sẽ bị ảnh hưởng.
-   - Đọc `d:\Projects\web-pomorodo\.agents\skills\pomo-design\SKILL.md` trước khi viết bất kỳ HTML/Tailwind nào.
-
-1.2. **Xác định phạm vi ảnh hưởng (Impact Scope):**
-   - Tính năng này thay đổi `template`, `script` hay **cả hai**?
-   - Tính năng này chỉ thay đổi 1 file hay cần sửa nhiều file?
-   - Tính năng này có ảnh hưởng đến Pinia Store không?
-
-1.3. **Đặt câu hỏi ngay nếu yêu cầu còn mơ hồ** — KHÔNG GIẢ ĐỊNH.
+1. **Đọc file liên quan** — Component/Store sẽ bị ảnh hưởng.
+2. **Đọc SKILL.md** — `d:\Projects\web-pomorodo\.agents\skills\pomo-design\SKILL.md` trước khi viết HTML/Tailwind.
+3. **Xác định phạm vi ảnh hưởng:**
+   - Thay đổi `template`, `script`, hay **cả hai**?
+   - Ảnh hưởng 1 file hay nhiều file?
+   - Cần sửa Pinia Store không? Cần Supabase call không?
+4. **Hỏi ngay nếu yêu cầu mơ hồ** — KHÔNG GIẢ ĐỊNH.
 
 ---
 
-## BƯỚC 2: Lên Kế Hoạch (Plan — KHÔNG Code Ngay!)
+## BƯỚC 2: Lên Kế Hoạch (KHÔNG Code Ngay!)
 
 > // turbo
 
-2.1. Mô tả ngắn gọn (1-3 dòng) về cách tiếp cận kỹ thuật (Technical Approach).
-
-2.2. Liệt kê các file sẽ được **tạo mới** hoặc **sửa đổi**.
-
-2.3. Xác định **side effects** có thể xảy ra.
+- Mô tả ngắn (1-3 dòng) Technical Approach.
+- Liệt kê file sẽ **tạo mới** hoặc **sửa đổi**.
+- Xác định **side effects** tiềm ẩn.
+- Nếu có Supabase: xác nhận RLS policy đã đủ chưa.
 
 ---
 
-## BƯỚC 3: Triển Khai Từng Bước Nhỏ (Implement Incrementally)
+## BƯỚC 3: Triển Khai Từng Bước
 
 > // turbo
 
-Quy tắc cứng cần tuân theo khi cài đặt:
+**Quy tắc cứng:**
 
-- **Quy tắc 1 - Tách Store & View**: Nếu tính năng có state/logic, PHẢI đặt vào Pinia Store trước, KHÔNG viết logic trực tiếp vào component `<template>`.
-- **Quy tắc 2 - Không dùng hardcode**: Không chèn mã màu Hex, kích thước pixel cứng vào HTML. Sử dụng Design Tokens của Tailwind (ví dụ: `text-primary`, `bg-surface-container`).
-- **Quy tắc 3 - SSR-Safe**: Bất kỳ code nào sử dụng `window`, `document`, hay `localStorage` phải được bọc trong `onMounted()` hoặc kiểm tra `typeof window !== 'undefined'`.
-- **Quy tắc 4 - Không xóa code cũ khi thêm code mới**: Nếu cần thay thế một block code, hãy comment tạm thời thay vì xóa, cho đến khi đã xác nhận tính năng mới hoạt động.
-- **Quy tắc 5 - a11y Bắt buộc**: Mọi `<button>` hoặc `<a>` chỉ chứa icon phải có `aria-label`.
+| # | Quy tắc | Mô tả |
+| :--- | :--- | :--- |
+| 1 | **Store-First** | State/logic đặt trong Pinia Store. Component chỉ bind template + gọi action. |
+| 2 | **No Hardcode** | Không chèn hex/px cứng vào HTML. Dùng Design Tokens Tailwind. |
+| 3 | **SSR-Safe** | `window`, `document`, `localStorage` → phải trong `onMounted()` hoặc `typeof window !== 'undefined'`. |
+| 4 | **Không xóa code cũ** | Comment tạm thay vì xóa, cho đến khi feature mới ổn định. |
+| 5 | **a11y bắt buộc** | `<button>` / `<a>` chỉ chứa icon → PHẢI có `aria-label`. |
+| 6 | **Error Handling** | Mọi Supabase call → destructure `{ data, error }`. Không bỏ qua lỗi im lặng. |
 
 ---
 
-## BƯỚC 4: Tự Kiểm Tra Trước Khi Báo Cáo (Self-QA)
+## BƯỚC 4: Self-QA (Bắt buộc trước khi báo cáo "Xong")
 
 > // turbo
 
-Trước khi nói "Xong", AI Agent BẮT BUỘC phải tự kiểm tra theo danh sách sau:
-
-- [ ] **Mở Browser Agent** và tự kiểm tra tính năng vừa thêm.
-- [ ] Kiểm tra tính năng hoạt động đúng trong trạng thái bình thường.
-- [ ] Kiểm tra các **Edge Cases**: Bấm nhanh, bấm nhiều lần, để trống input...
-- [ ] Kiểm tra trên cả Mobile View (Viewport 390px) và Desktop (1440px).
-- [ ] Kiểm tra Console có báo lỗi hay Warning bất thường không.
+- [ ] **Mở Browser Agent** và tự test tính năng vừa thêm.
+- [ ] Hoạt động đúng ở trạng thái bình thường.
+- [ ] Edge cases: bấm nhanh, bấm nhiều lần, để trống input, chưa đăng nhập.
+- [ ] Mobile (390px) và Desktop (1440px).
+- [ ] Console sạch — không có lỗi hay Warning lạ.
+- [ ] PomoDesign QA Checklist (từ SKILL.md): border, opacity, radius, color token, no hardcode.
 
 ---
 
-## BƯỚC 5: Báo Cáo & Commit (Report & Commit)
+## BƯỚC 5: Báo Cáo & Commit
 
-5.1. Báo cáo tóm tắt lại những gì đã làm, kèm ảnh chụp màn hình nếu có thay đổi UI.
+5.1. Tóm tắt những gì đã làm, kèm ảnh chụp UI nếu có thay đổi giao diện.
 
-5.2. Commit với thông điệp rõ ràng theo định dạng:
+5.2. Commit theo format:
 ```
-<type>: <mô tả ngắn gọn bằng tiếng Anh>
+<type>: <mô tả ngắn tiếng Anh>
 
-Ví dụ:
-Feat: Add quick-set time chips to Focus Dashboard
-Fix: Resolve volume slider conflict with draggable player
-Refactor: Extract beep logic into a composable
+feat: Add quick-set time chips to Focus Dashboard
+fix: Resolve volume slider conflict with draggable player
+refactor: Extract beep logic into a composable
+fix(db): Handle missing profile for Google OAuth users
 ```
 
-5.3. Cập nhật `PROJECT_STATE.md` nếu tính năng là một milestone quan trọng.
+5.3. Cập nhật `PROJECT_STATE.md` nếu đây là milestone quan trọng.
 
 ---
 
@@ -87,8 +85,9 @@ Refactor: Extract beep logic into a composable
 
 | Loại yêu cầu | Files thường bị ảnh hưởng |
 | :--- | :--- |
-| Thay đổi UI/Style | `<FeatureName>.vue` (template), PomoDesign SKILL |
-| Thêm state/logic | `useTimerStore.ts` hoặc `useAudioStore.ts` + Component |
-| Tính năng âm thanh | `useTimerStore.ts` (Web Audio API) |
+| Thay đổi UI/Style | `*.vue` (template), PomoDesign SKILL |
+| Thêm state/logic | Pinia Store + Component |
+| Tính năng âm thanh | `useAudioStore.ts`, `useMusicStore.ts` |
 | Responsive/Layout | `app/pages/*.vue`, `app/layouts/default.vue` |
-| Cài đặt mới | `useTimerStore.ts` (settings key) + `app/pages/settings.vue` |
+| Cài đặt mới | `useTimerStore.ts` + `settings.vue` + `user_settings` table |
+| Supabase data mới | Store + Supabase schema + RLS policy |
