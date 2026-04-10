@@ -185,16 +185,24 @@ export const useTimerStore = defineStore('timer', () => {
     isRunning.value ? pause() : start()
   }
 
-  const reset = () => {
-    recordSession('abandoned')
+  // resetTimer(): chỉ reset state, KHÔNG ghi DB. Dùng nội bộ khi chuyển mode.
+  const resetTimer = () => {
     pause()
     timeRemaining.value = currentDuration.value
     sessionStartedAt.value = 0
+    lastBeepedSecond.value = -1
   }
 
+  // reset(): dành cho user bấm nút Reset — ghi abandoned trước khi reset
+  const reset = () => {
+    recordSession('abandoned')
+    resetTimer()
+  }
+
+  // setMode(): chuyển chế độ timer mà KHÔNG ghi thêm session nào vào DB
   const setMode = (newMode: TimerMode) => {
     mode.value = newMode
-    reset()
+    resetTimer()
   }
 
   const quickSet = (minutes: number) => {
@@ -202,7 +210,8 @@ export const useTimerStore = defineStore('timer', () => {
     if (mode.value === 'focus') settings.value.focusDuration = seconds
     else if (mode.value === 'shortBreak') settings.value.shortBreakDuration = seconds
     else if (mode.value === 'longBreak') settings.value.longBreakDuration = seconds
-    reset()
+    // quickSet cũng dùng resetTimer vì nó không phải user reset session
+    resetTimer()
   }
   
   const triggerAlarm = () => {
@@ -250,31 +259,31 @@ export const useTimerStore = defineStore('timer', () => {
   }
 
   const completeSession = () => {
-    recordSession('completed')
+    // 1. Dừng interval trước để không tick thêm
     pause()
+    // 2. Ghi session completed vào DB (sessionStartedAt sẽ bị clear trong recordSession)
+    recordSession('completed')
+    // 3. Phát alarm
     triggerAlarm()
 
-    let nextMode: TimerMode = 'focus'
-    
     if (mode.value === 'focus') {
       sessionsCompleted.value++
       todayCompletedCount.value++ // Instantly reflect in Sidebar UI
-      nextMode = sessionsCompleted.value % settings.value.sessionsBeforeLongBreak === 0 ? 'longBreak' : 'shortBreak'
+      const nextMode: TimerMode = sessionsCompleted.value % settings.value.sessionsBeforeLongBreak === 0 ? 'longBreak' : 'shortBreak'
       setMode(nextMode)
       if (settings.value.autoStartBreaks) start()
     } else {
-      nextMode = 'focus'
-      setMode(nextMode)
+      setMode('focus')
       if (settings.value.autoStartPomodoros) start()
     }
   }
 
   const skipSession = () => {
+    // Ghi session trước — recordSession sẽ clear sessionStartedAt
     recordSession('skipped')
-    
-    let nextMode: TimerMode = 'focus'
+    // Sau đó mới chuyển mode (setMode -> resetTimer, không ghi DB thêm)
     if (mode.value === 'focus') {
-      nextMode = (sessionsCompleted.value + 1) % settings.value.sessionsBeforeLongBreak === 0 ? 'longBreak' : 'shortBreak'
+      const nextMode = (sessionsCompleted.value + 1) % settings.value.sessionsBeforeLongBreak === 0 ? 'longBreak' : 'shortBreak'
       setMode(nextMode)
     } else {
       setMode('focus')

@@ -6,7 +6,7 @@
 ## 1. Trạng thái Dự án (Current Status)
 
 - **Giai đoạn hiện tại:** Phase 6 — Production Integration & Feature Refinement.
-- **Branch hiện tại:** `feat/supabase-sync-integration`
+- **Branch hiện tại:** `dev`
 
 ### Tiến độ (Progress Checklist)
 - [x] Chốt yêu cầu phần mềm (`document/srs.md`).
@@ -23,6 +23,8 @@
 - [x] Dashboard AudioSanctuaryWidget → UI đơn giản (chỉ còn URL input).
 - [x] Fix `ensureProfile` — tự tạo profile khi Google OAuth login.
 - [x] Fix silent error trong `addTrack` → hiện lỗi rõ ràng cho user.
+- [x] Fix double-insert session bug in `useTimerStore`.
+- [x] Optimize session data fetching (loadData with isLoaded guard).
 - [x] Push code lên Git.
 - [ ] Viết Vitest unit tests cho `useTimerStore`.
 - [ ] Performance Analytics (`analytics.vue`) — verify chart data từ `pomo_sessions`.
@@ -97,6 +99,7 @@ app/
 
 ## 5. Changelog
 
+- **[10/04/2026]**: Refactor `useSessionStore` to optimize API calls (centralized loadData), fix double-insert session bug in `useTimerStore`, and standardize data fetching for History/Stats/Sessions pages.
 - **[30/03/2026]**: Refactor Settings form (Save button, explicit Supabase sync for new columns), fix ContextualPlayer auto-play bug, and add Personal Track deletion feature in Library.
 - **[30/03/2026]**: Chuẩn hóa `.agents/` và `PROJECT_STATE.md` theo chuẩn Antigravity.
 - **[26/03/2026]**: Fix `ensureProfile()` trong `useAuthStore` — tự tạo profiles + user_settings khi Google OAuth login. Fix foreign key `personal_tracks.user_id` → `auth.users`. Fix silent error trong `addTrack`.

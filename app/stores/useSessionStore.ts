@@ -3,15 +3,14 @@ import { ref } from 'vue'
 import { useSupabase } from '~/composables/useSupabase'
 import { useAuthStore } from './useAuthStore'
 
-// These values match what useTimerStore actually inserts into pomo_sessions
 interface PomoSession {
   id: string
   user_id: string
   type: 'deep_focus' | 'short_break' | 'long_break'
-  actual_duration: number  // seconds actually worked
+  actual_duration: number
   planned_duration: number
   status: 'completed' | 'skipped' | 'abandoned'
-  started_at: string       // ISO timestamp
+  started_at: string
 }
 
 export const useSessionStore = defineStore('session', () => {
@@ -19,11 +18,14 @@ export const useSessionStore = defineStore('session', () => {
   const authStore = useAuthStore()
 
   const recentSessions = ref<PomoSession[]>([])
-  const weeklyData = ref<number[]>([5, 5, 5, 5, 5, 5, 5]) // bar heights %
+  const allSessions = ref<PomoSession[]>([])   // dùng cho trang /sessions
+  const weeklyData = ref<number[]>([5, 5, 5, 5, 5, 5, 5])
   const todayFocusHrs = ref('0.0')
   const todayCount = ref(0)
   const isLoadingRecent = ref(false)
   const isLoadingStats = ref(false)
+  // Guard: đảm bảo mỗi lần load web chỉ gọi API đúng 1 lần
+  const isLoaded = ref(false)
 
   // Load last 5 focus sessions for History Widget
   const loadRecentSessions = async () => {
@@ -33,7 +35,7 @@ export const useSessionStore = defineStore('session', () => {
     const { data, error } = await (supabase.from('pomo_sessions') as any)
       .select('*')
       .eq('user_id', authStore.user.id)
-      .eq('type', 'deep_focus') // useTimerStore maps 'focus' -> 'deep_focus'
+      .eq('type', 'deep_focus')
       .order('started_at', { ascending: false })
       .limit(5)
 
@@ -43,6 +45,23 @@ export const useSessionStore = defineStore('session', () => {
       recentSessions.value = data ?? []
     }
     isLoadingRecent.value = false
+  }
+
+  // Load toàn bộ sessions cho trang /sessions (limit 50)
+  const loadAllSessions = async () => {
+    if (!authStore.user) return
+
+    const { data, error } = await (supabase.from('pomo_sessions') as any)
+      .select('*')
+      .eq('user_id', authStore.user.id)
+      .order('started_at', { ascending: false })
+      .limit(50)
+
+    if (error) {
+      console.error('[SessionStore] loadAllSessions error:', error.message)
+    } else {
+      allSessions.value = data ?? []
+    }
   }
 
   // Load 7-day stats for Stats Widget
@@ -97,14 +116,41 @@ export const useSessionStore = defineStore('session', () => {
     isLoadingStats.value = false
   }
 
+  // loadData(): entry point DUY NHẤT — gọi 1 lần sau khi auth ready
+  // Chạy parallel cả 3 queries, có guard isLoaded để tránh duplicate
+  const loadData = async (force = false) => {
+    if (!authStore.user) return
+    if (isLoaded.value && !force) return  // Đã load rồi, bỏ qua
+
+    isLoaded.value = true
+    // Chạy song song 3 queries thay vì tuần tự
+    await Promise.all([
+      loadRecentSessions(),
+      loadWeeklyStats(),
+      loadAllSessions(),
+    ])
+  }
+
+  // Gọi lại sau khi hoàn thành 1 session (cập nhật UI realtime)
+  const refreshAfterSession = () => {
+    loadRecentSessions()
+    loadWeeklyStats()
+    // allSessions không cần refresh realtime (chỉ load khi vào trang /sessions)
+  }
+
   return {
     recentSessions,
+    allSessions,
     weeklyData,
     todayFocusHrs,
     todayCount,
     isLoadingRecent,
     isLoadingStats,
+    isLoaded,
+    loadData,
+    refreshAfterSession,
+    // Vẫn giữ để backward compat nếu cần gọi riêng
     loadRecentSessions,
-    loadWeeklyStats
+    loadWeeklyStats,
   }
 })

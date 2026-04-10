@@ -47,23 +47,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+// Không cần watch hay fetch ở đây.
+// Data đã được load 1 lần duy nhất bởi useAuthStore.initAuthSession()
+// thông qua useSessionStore().loadData()
+import { computed } from 'vue'
 import { useSessionStore } from '~/stores/useSessionStore'
-import { useAuthStore } from '~/stores/useAuthStore'
 
 const sessionStore = useSessionStore()
-const authStore = useAuthStore()
 
 const dayLabels = computed(() => {
   const days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
   const today = new Date().getDay()
   return Array.from({ length: 7 }, (_, i) => days[(today - 6 + i + 7) % 7])
 })
-
-// Reactively load stats when auth is ready
-watch(() => authStore.user, (user) => {
-  if (user) {
-    sessionStore.loadWeeklyStats()
-  }
-}, { immediate: true })
 </script>
