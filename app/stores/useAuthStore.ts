@@ -5,6 +5,7 @@ import type { User } from '@supabase/supabase-js'
 import { useTimerStore } from './useTimerStore'
 import { useAudioStore } from './useAudioStore'
 import { useMusicStore } from './useMusicStore'
+import { useSessionStore } from './useSessionStore'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
@@ -18,17 +19,23 @@ export const useAuthStore = defineStore('auth', () => {
     const { data: { session } } = await supabase.auth.getSession()
     user.value = session?.user ?? null
     
-    // Ensure profile exists for current session (handles returning OAuth users)
     if (session?.user) {
       await ensureProfile(session.user)
+      // Load session data ngay khi auth khởi tạo xong — DUY NHẤT lần này
+      useSessionStore().loadData()
     }
     
     // Listen for auth state changes globally
     supabase.auth.onAuthStateChange(async (_event, session) => {
       user.value = session?.user ?? null
-      // On every sign-in, ensure profile exists (Google OAuth may not trigger DB trigger)
       if (_event === 'SIGNED_IN' && session?.user) {
         await ensureProfile(session.user)
+        // Khi sign-in (OAuth callback), force reload vì user mới
+        useSessionStore().loadData(true)
+      }
+      if (_event === 'SIGNED_OUT') {
+        // Reset guard để lần đăng nhập sau load fresh
+        useSessionStore().isLoaded = false
       }
     })
     
@@ -88,6 +95,7 @@ export const useAuthStore = defineStore('auth', () => {
     useTimerStore().clearAllData()
     useAudioStore().clearAllData()
     useMusicStore().resetStore()
+    // isLoaded sẽ được reset bởi onAuthStateChange SIGNED_OUT handler ở trên
 
     user.value = null
   }

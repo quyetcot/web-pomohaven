@@ -38,11 +38,11 @@
         <div class="flex-1 min-w-0">
           <p class="text-xs font-semibold text-white">Focus Session</p>
           <p class="text-[0.6rem] text-muted uppercase tracking-wider mt-0.5">
-            {{ formatDuration(session.duration) }}
+            {{ formatDuration(session.actual_duration) }}
           </p>
         </div>
         <div class="text-[0.6rem] text-muted/70 self-center shrink-0">
-          {{ formatTime(session.created_at) }}
+          {{ formatTime(session.started_at) }}
         </div>
       </div>
     </div>
@@ -50,19 +50,12 @@
 </template>
 
 <script setup lang="ts">
-import { watch, onMounted } from 'vue'
+// Không cần watch hay fetch ở đây.
+// Data đã được load 1 lần duy nhất bởi useAuthStore.initAuthSession()
+// thông qua useSessionStore().loadData()
 import { useSessionStore } from '~/stores/useSessionStore'
-import { useAuthStore } from '~/stores/useAuthStore'
 
 const sessionStore = useSessionStore()
-const authStore = useAuthStore()
-
-// Watch for user auth state to load data (fixes race condition on hard refresh)
-watch(() => authStore.user, (user) => {
-  if (user) {
-    sessionStore.loadRecentSessions()
-  }
-}, { immediate: true })
 
 const formatDuration = (seconds: number) => {
   const min = Math.floor(seconds / 60)

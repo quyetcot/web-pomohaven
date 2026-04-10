@@ -22,19 +22,20 @@
       </div>
       
       <div class="space-y-4">
-        <div v-if="loading" class="text-center py-12">
+        <!-- Loading -->
+        <div v-if="sessionStore.isLoadingRecent" class="text-center py-12">
            <span class="material-symbols-outlined text-4xl animate-spin text-primary">progress_activity</span>
         </div>
         
-        <!-- If Empty State -->
-        <div v-else-if="sessions.length === 0" class="text-center py-12">
+        <!-- Empty State -->
+        <div v-else-if="sessionStore.allSessions.length === 0" class="text-center py-12">
           <span class="material-symbols-outlined text-6xl text-muted/30 block mb-4">hourglass_empty</span>
           <p class="text-sm text-muted">No sessions completed yet. Start focusing to build your history!</p>
         </div>
         
         <!-- Real List of Sessions -->
         <template v-else>
-          <div v-for="session in sessions" :key="session.id" class="flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-2xl hover:bg-surface-variant transition-colors group cursor-pointer border border-transparent hover:border-muted/10">
+          <div v-for="session in sessionStore.allSessions" :key="session.id" class="flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-2xl hover:bg-surface-variant transition-colors group cursor-pointer border border-transparent hover:border-muted/10">
             <!-- Icon -->
             <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 transition-transform"
                  :class="session.type === 'deep_focus' ? 'bg-primary-glow/10 text-primary group-hover:scale-110' : 'bg-tertiary/10 text-tertiary group-hover:scale-110'">
@@ -77,28 +78,21 @@
 </template>
 
 <script setup lang="ts">
+// sessions.vue reuse sessionStore.allSessions — không query Supabase riêng.
+// Nếu user vào trang này trực tiếp mà data chưa load (vd: OAuth redirect),
+// loadData() sẽ được gọi vì isLoaded vẫn là false.
+import { onMounted } from 'vue'
+import { useSessionStore } from '~/stores/useSessionStore'
 import { useAuthStore } from '~/stores/useAuthStore'
-import { useSupabase } from '~/composables/useSupabase'
-import { ref, onMounted } from 'vue'
 
+const sessionStore = useSessionStore()
 const authStore = useAuthStore()
-const supabase = useSupabase()
 
-const sessions = ref<any[]>([])
-const loading = ref(true)
-
-onMounted(async () => {
-  if (authStore.user) {
-    const { data } = await supabase
-      .from('pomo_sessions' as any)
-      .select('*')
-      .eq('user_id', authStore.user.id)
-      .order('started_at', { ascending: false })
-      .limit(50)
-    
-    if (data) sessions.value = data
+// Fallback: nếu user vào /sessions trực tiếp (deep link) và auth chưa trigger loadData
+onMounted(() => {
+  if (authStore.user && !sessionStore.isLoaded) {
+    sessionStore.loadData()
   }
-  loading.value = false
 })
 
 const formatDuration = (seconds: number) => {
