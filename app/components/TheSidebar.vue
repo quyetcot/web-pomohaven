@@ -44,9 +44,9 @@
             <span class="material-symbols-outlined text-[14px] text-muted opacity-0 group-hover:opacity-100 transition-opacity">edit</span>
           </div>
           <div class="h-1.5 w-full bg-surface-variant rounded-full overflow-hidden">
-            <div class="h-full bg-primary-glow transition-all duration-700 ease-out" :style="{ width: Math.min(100, (timerStore.todayCompletedCount / (timerStore.settings.dailyGoal || 1)) * 100) + '%' }"></div>
+            <div class="h-full bg-primary-glow transition-all duration-700 ease-out" :style="{ width: Math.min(100, (sessionStore.todayCount / (timerStore.settings.dailyGoal || 1)) * 100) + '%' }"></div>
           </div>
-          <p class="text-[0.6875rem] mt-2 text-primary font-medium">{{ timerStore.todayCompletedCount }}/{{ timerStore.settings.dailyGoal }} Sessions</p>
+          <p class="text-[0.6875rem] mt-2 text-primary font-medium">{{ sessionStore.todayCount }}/{{ timerStore.settings.dailyGoal }} Sessions</p>
         </div>
 
         <!-- Popover Editing Modal -->
@@ -101,24 +101,31 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { onClickOutside } from '@vueuse/core'
 import { useAuthStore } from '~/stores/useAuthStore'
 import { useTimerStore } from '~/stores/useTimerStore'
+import { useSessionStore } from '~/stores/useSessionStore'
 
 const authStore = useAuthStore()
 const timerStore = useTimerStore()
+const sessionStore = useSessionStore()
 const router = useRouter()
 
 const isEditingGoal = ref(false)
 const goalModalRef = ref<HTMLElement | null>(null)
 
-// Call Supabase count immediately if user is theoretically logged in
-// It gracefully exits early inside the store if no user is found.
-onMounted(() => {
-  timerStore.fetchTodayCompleted()
-})
+// Watch authStore.user thay onMounted để tránh race condition với initAuthSession()
+watch(
+  () => authStore.user,
+  (user) => {
+    if (user && !sessionStore.isLoaded) {
+      sessionStore.loadData()
+    }
+  },
+  { immediate: true }
+)
 
 onClickOutside(goalModalRef, () => {
   if (isEditingGoal.value) isEditingGoal.value = false
