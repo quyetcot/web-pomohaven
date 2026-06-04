@@ -82,17 +82,15 @@ export const useTimerStore = defineStore('timer', () => {
     }
   }
   
-  // Keep timer synced when settings are manually changed
-  watch(() => settings.value, (newSettings, oldSettings) => {
+  // Keep timer synced when settings are manually changed (display only — DB sync via settings.vue)
+  watch(() => settings.value, (newSettings) => {
     if (!isRunning.value) {
       if (mode.value === 'focus') timeRemaining.value = newSettings.focusDuration
       else if (mode.value === 'shortBreak') timeRemaining.value = newSettings.shortBreakDuration
       else if (mode.value === 'longBreak') timeRemaining.value = newSettings.longBreakDuration
     }
-    
-    // Sync to Supabase
-    const { saveSettings } = useSettingsSync()
-    saveSettings()
+    // NOTE: saveSettings() đã bị xóa khỏi đây — tránh race condition với 3 upsert đồng thời
+    // settings.vue sẽ gọi saveSettings() tường minh sau khi user bấm Save
   }, { deep: true })
   
   // Anti-drift variables

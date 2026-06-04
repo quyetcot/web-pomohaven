@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, watch } from 'vue'
 import { useLocalStorage } from '@vueuse/core'
-import { useSettingsSync } from '~/composables/useSettingsSync'
 
 export const useAudioStore = defineStore('audio', () => {
   // Persisted settings
@@ -12,11 +11,8 @@ export const useAudioStore = defineStore('audio', () => {
     autoPauseBreak: false
   })
 
-  // Sync to Supabase when settings change
-  watch(() => settings.value, () => {
-    const { saveSettings } = useSettingsSync()
-    saveSettings()
-  }, { deep: true })
+  // NOTE: Auto-sync bị tắt cố ý — settings.vue gọi saveSettings() tường minh
+  // Tránh race condition khi 3 lần upsert chạy đồng thời
 
   const currentVideoId = ref(settings.value.defaultVideoId)
   const isPlaying = ref(false)
