@@ -129,6 +129,13 @@ export const useTimerStore = defineStore('timer', () => {
     return `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`
   })
 
+  // Label for document title display
+  const modeLabel = computed(() => {
+    if (mode.value === 'focus') return 'Focus'
+    if (mode.value === 'shortBreak') return 'Rest'
+    return 'Long Rest'
+  })
+
   // Actions
   const tick = () => {
     if (!isRunning.value) return
@@ -319,6 +326,7 @@ export const useTimerStore = defineStore('timer', () => {
     formattedTime,
     progressPercent,
     currentDuration,
+    modeLabel,
     
     // Actions
     start,
