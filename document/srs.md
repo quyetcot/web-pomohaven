@@ -60,7 +60,7 @@ Tạo ra một hệ sinh thái làm việc tập trung (Deep Work Sanctuary). H�
 | `user_id` | uuid | Foreign Key (FK) -> profiles.id |
 | `focus_time` | integer | 3000 (seconds) |
 | `break_time` | integer | 600 (seconds) |
-| `yt_video_id` | text | 'jfKfPfyJRdk' |
+| `yt_video_id` | text | 'X4VbdwhkE10' |
 | `volume` | integer | 100 |
 
 #### C. Table: `pomo_sessions`

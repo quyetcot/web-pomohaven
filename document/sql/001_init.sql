@@ -24,7 +24,7 @@ CREATE TABLE public.user_settings (
     user_id UUID PRIMARY KEY REFERENCES public.profiles(id) ON DELETE CASCADE,
     focus_time INTEGER DEFAULT 3000, -- 50 phút
     break_time INTEGER DEFAULT 600,  -- 10 phút
-    yt_video_id TEXT DEFAULT 'jfKfPfyJRdk',
+    yt_video_id TEXT DEFAULT 'X4VbdwhkE10',
     volume INTEGER DEFAULT 100
 );
 
