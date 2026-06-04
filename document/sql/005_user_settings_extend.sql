@@ -1,37 +1,27 @@
 -- ============================================================================
 -- Migration: 005_user_settings_extend
 -- Description: Thêm các columns còn thiếu vào bảng user_settings
---              Tất cả các columns này đều có logic thực tế trong app đang sử dụng
 -- Created at: 2026-06-04
--- Root cause: 001_init.sql chỉ tạo 5 columns cơ bản, bỏ sót 4 columns quan trọng
+-- Chỉ thêm columns có logic thực tế trong app:
+--   long_break_time → timer longBreak mode (setMode, skip, reset)
+--   sound_enabled   → playBeep() + triggerAlarm() check trước khi phát âm
+--   daily_goal      → Today's Goal widget trong Sidebar
+-- Bỏ auto_play_focus và auto_pause_break vì chưa có code logic consume chúng
 -- ============================================================================
 
--- Thêm long_break_time (Long Break Duration — dùng trong timer setMode/skip/reset)
+-- Thêm long_break_time (Long Break Duration)
 ALTER TABLE public.user_settings
-  ADD COLUMN IF NOT EXISTS long_break_time INTEGER DEFAULT 900; -- 15 phút = 900 giây
+  ADD COLUMN IF NOT EXISTS long_break_time INTEGER DEFAULT 900; -- 15 phút
 
--- Thêm sound_enabled (Notification & Sounds — dùng trong playBeep() và triggerAlarm())
+-- Thêm sound_enabled (Notification & Sounds)
 ALTER TABLE public.user_settings
   ADD COLUMN IF NOT EXISTS sound_enabled BOOLEAN DEFAULT true;
 
--- Thêm auto_play_focus (Auto-play Music khi focus bắt đầu)
-ALTER TABLE public.user_settings
-  ADD COLUMN IF NOT EXISTS auto_play_focus BOOLEAN DEFAULT false;
-
--- Thêm auto_pause_break (Auto-pause Music khi vào break)
-ALTER TABLE public.user_settings
-  ADD COLUMN IF NOT EXISTS auto_pause_break BOOLEAN DEFAULT false;
-
--- Thêm daily_goal (Today's Goal — số sessions mục tiêu mỗi ngày)
+-- Thêm daily_goal (Today's Goal trong Sidebar)
 ALTER TABLE public.user_settings
   ADD COLUMN IF NOT EXISTS daily_goal INTEGER DEFAULT 8;
 
--- ============================================================================
--- RLS: user_settings đã có policy từ trước (thông qua ensureProfile)
--- Không cần thêm policy mới vì ALTER COLUMN không ảnh hưởng đến RLS
--- ============================================================================
-
--- Verify (uncomment để kiểm tra sau khi apply):
+-- Verify:
 -- SELECT column_name, data_type, column_default
 -- FROM information_schema.columns
 -- WHERE table_schema = 'public' AND table_name = 'user_settings'

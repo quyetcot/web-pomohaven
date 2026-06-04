@@ -31,13 +31,12 @@ export const useSettingsSync = () => {
     timerStore.settings.longBreakDuration = data.long_break_time || timerStore.settings.longBreakDuration
     timerStore.settings.dailyGoal = data.daily_goal || timerStore.settings.dailyGoal
     
-    // Hydrate Audio & Behavior Settings
+    timerStore.settings.soundEnabled = data.sound_enabled ?? timerStore.settings.soundEnabled
+    timerStore.settings.notificationsEnabled = timerStore.settings.soundEnabled
+
+    // Hydrate Audio Settings
     audioStore.settings.defaultVideoId = data.yt_video_id || audioStore.settings.defaultVideoId
     audioStore.settings.defaultVolume = data.volume ?? audioStore.settings.defaultVolume
-    audioStore.settings.autoPlayFocus = data.auto_play_focus ?? audioStore.settings.autoPlayFocus
-    audioStore.settings.autoPauseBreak = data.auto_pause_break ?? audioStore.settings.autoPauseBreak
-    timerStore.settings.soundEnabled = data.sound_enabled ?? timerStore.settings.soundEnabled
-    timerStore.settings.notificationsEnabled = timerStore.settings.soundEnabled // map legacy alias
   }
 
   // Save settings to Supabase
@@ -57,8 +56,6 @@ export const useSettingsSync = () => {
         long_break_time: timerStore.settings.longBreakDuration,
         yt_video_id: audioStore.settings.defaultVideoId,
         volume: audioStore.settings.defaultVolume,
-        auto_play_focus: audioStore.settings.autoPlayFocus,
-        auto_pause_break: audioStore.settings.autoPauseBreak,
         sound_enabled: timerStore.settings.soundEnabled
       }, { onConflict: 'user_id' })
 

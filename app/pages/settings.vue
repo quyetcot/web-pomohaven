@@ -76,28 +76,6 @@
               </button>
             </div>
           </div>
-          
-          <div class="space-y-4 bg-void/30 p-4 rounded-xl ghost-border">
-            <div @click="settingsForm.autoPlayFocus = !settingsForm.autoPlayFocus" class="flex items-center justify-between p-3 rounded-lg hover:bg-surface-variant transition-colors cursor-pointer group">
-              <div class="flex flex-col">
-                <span class="text-sm font-medium text-white">Auto-play Focus Music</span>
-                <span class="text-[0.625rem] text-muted uppercase">Starts when timer begins</span>
-              </div>
-              <button :class="settingsForm.autoPlayFocus ? 'bg-primary-glow shadow-[0_0_10px_rgba(75,142,255,0.4)]' : 'bg-surface-variant'" class="w-10 h-5 rounded-full relative transition-colors">
-                <div :class="settingsForm.autoPlayFocus ? 'right-1 bg-void' : 'left-1 bg-muted'" class="absolute top-1 w-3 h-3 rounded-full transition-all"></div>
-              </button>
-            </div>
-            
-            <div @click="settingsForm.autoPauseBreak = !settingsForm.autoPauseBreak" class="flex items-center justify-between p-3 rounded-lg hover:bg-surface-variant transition-colors cursor-pointer">
-              <div class="flex flex-col">
-                <span class="text-sm font-medium text-white">Auto-pause on Break</span>
-                <span class="text-[0.625rem] text-muted uppercase">Silence during rest periods</span>
-              </div>
-              <button :class="settingsForm.autoPauseBreak ? 'bg-primary-glow shadow-[0_0_10px_rgba(75,142,255,0.4)]' : 'bg-surface-variant'" class="w-10 h-5 rounded-full relative transition-colors">
-                <div :class="settingsForm.autoPauseBreak ? 'right-1 bg-void' : 'left-1 bg-muted'" class="absolute top-1 w-3 h-3 rounded-full transition-all"></div>
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </section>
@@ -180,8 +158,6 @@ const settingsForm = reactive({
   longMins: Math.floor(store.settings.longBreakDuration / 60),
   youtubeUrl: `https://www.youtube.com/watch?v=${audioStore.settings.defaultVideoId}`,
   soundEnabled: store.settings.soundEnabled ?? true,
-  autoPlayFocus: audioStore.settings.autoPlayFocus,
-  autoPauseBreak: audioStore.settings.autoPauseBreak,
 })
 
 const isSavingSettings = ref(false)
@@ -211,10 +187,7 @@ const saveSettings = async () => {
     audioStore.setDefaultTrack(vid)
   }
   
-  // Audio attributes
-  audioStore.settings.autoPlayFocus = settingsForm.autoPlayFocus
-  audioStore.settings.autoPauseBreak = settingsForm.autoPauseBreak
-  
+  // Audio attributes (auto-play/pause removed — not yet implemented)
   // Force Explicit DB Sync
   const { saveSettings: syncToDb } = useSettingsSync()
   await syncToDb()
