@@ -275,12 +275,12 @@ export const useTimerStore = defineStore('timer', () => {
     }
   }
 
-  const completeSession = () => {
+  const completeSession = async () => {
     // 1. Dừng interval trước để không tick thêm
     pause()
-    // 2. Ghi session completed vào DB (sessionStartedAt sẽ bị clear trong recordSession)
-    recordSession('completed')
-    // 3. Refresh Session Store để Sessions page + Dashboard cập nhật ngay
+    // 2. Ghi session completed vào DB — AWAIT để đảm bảo insert xong trước khi refresh
+    await recordSession('completed')
+    // 3. Refresh Session Store SAU KHI insert xong → widgets hiển thị đúng
     if (mode.value === 'focus') {
       useSessionStore().refreshAfterSession()
     }
