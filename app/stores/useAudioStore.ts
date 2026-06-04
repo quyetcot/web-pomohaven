@@ -1,91 +1,92 @@
-import { defineStore } from 'pinia'
-import { ref, watch } from 'vue'
-import { useLocalStorage } from '@vueuse/core'
-import { useSettingsSync } from '~/composables/useSettingsSync'
+import { defineStore } from "pinia";
+import { ref, watch } from "vue";
+import { useLocalStorage } from "@vueuse/core";
 
-export const useAudioStore = defineStore('audio', () => {
+export const useAudioStore = defineStore("audio", () => {
   // Persisted settings
-  const settings = useLocalStorage('pomohaven_audio_v1', {
-    defaultVideoId: 'jfKfPfyJRdk', // Lofi Girl fallback
+  const settings = useLocalStorage("pomohaven_audio_v1", {
+    defaultVideoId: "X4VbdwhkE10", // Lofi Girl fallback
     defaultVolume: 100,
     autoPlayFocus: false,
-    autoPauseBreak: false
-  })
+    autoPauseBreak: false,
+  });
 
-  // Sync to Supabase when settings change
-  watch(() => settings.value, () => {
-    const { saveSettings } = useSettingsSync()
-    saveSettings()
-  }, { deep: true })
+  // NOTE: Auto-sync bị tắt cố ý — settings.vue gọi saveSettings() tường minh
+  // Tránh race condition khi 3 lần upsert chạy đồng thời
 
-  const currentVideoId = ref(settings.value.defaultVideoId)
-  const isPlaying = ref(false)
-  const isPlayerVisible = ref(false)
-  const volumeRain = ref(0)
-  const volumeCoffee = ref(0)
-  
+  const currentVideoId = ref(settings.value.defaultVideoId);
+  const isPlaying = ref(false);
+  const isPlayerVisible = ref(false);
+  const volumeRain = ref(0);
+  const volumeCoffee = ref(0);
+
   // Shared metadata
-  const currentTitle = ref("Loading Audio...")
-  const currentAuthor = ref("Aural Sanctuary")
-  
+  const currentTitle = ref("Loading Audio...");
+  const currentAuthor = ref("Aural Sanctuary");
+
   // Keep base video ID synced if user changes default (including on Hydration from LocalStorage)
-  watch(() => settings.value.defaultVideoId, (newId) => {
-    if (!isPlaying.value) {
-      currentVideoId.value = newId
-    }
-  }, { immediate: true })
-  
+  watch(
+    () => settings.value.defaultVideoId,
+    (newId) => {
+      if (!isPlaying.value) {
+        currentVideoId.value = newId;
+      }
+    },
+    { immediate: true },
+  );
+
   const setVideoId = (input: string) => {
-    const vid = extractVideoId(input)
+    const vid = extractVideoId(input);
     if (vid) {
-      currentVideoId.value = vid
-      isPlaying.value = true
-      isPlayerVisible.value = true
+      currentVideoId.value = vid;
+      isPlaying.value = true;
+      isPlayerVisible.value = true;
     }
-  }
+  };
 
   const setDefaultTrack = (input: string) => {
-    const vid = extractVideoId(input)
+    const vid = extractVideoId(input);
     if (vid) {
-      settings.value.defaultVideoId = vid
+      settings.value.defaultVideoId = vid;
       // Also update current playing if nothing is playing or if we want immediate feedback
       if (!isPlaying.value) {
-        currentVideoId.value = vid
+        currentVideoId.value = vid;
       }
     }
-  }
+  };
 
   const extractVideoId = (input: string) => {
-    if (input.length === 11 && !input.includes('/')) return input
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
-    const match = input.match(regExp)
-    return (match && match[2] && match[2].length === 11) ? match[2] : null
-  }
+    if (input.length === 11 && !input.includes("/")) return input;
+    const regExp =
+      /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = input.match(regExp);
+    return match && match[2] && match[2].length === 11 ? match[2] : null;
+  };
 
   const updateMetadata = (title: string, author: string) => {
-    currentTitle.value = title
-    currentAuthor.value = author
-  }
+    currentTitle.value = title;
+    currentAuthor.value = author;
+  };
 
   const play = () => {
-    isPlaying.value = true
-    isPlayerVisible.value = true
-  }
+    isPlaying.value = true;
+    isPlayerVisible.value = true;
+  };
 
   const pause = () => {
-    isPlaying.value = false
-  }
+    isPlaying.value = false;
+  };
 
   const togglePlay = () => {
-    isPlaying.value ? pause() : play()
-  }
+    isPlaying.value ? pause() : play();
+  };
 
   const clearAllData = () => {
-    pause()
-    settings.value.defaultVideoId = 'jfKfPfyJRdk'
-    settings.value.defaultVolume = 100
-    currentVideoId.value = 'jfKfPfyJRdk'
-  }
+    pause();
+    settings.value.defaultVideoId = "X4VbdwhkE10";
+    settings.value.defaultVolume = 100;
+    currentVideoId.value = "X4VbdwhkE10";
+  };
 
   return {
     // State
@@ -97,7 +98,7 @@ export const useAudioStore = defineStore('audio', () => {
     volumeCoffee,
     currentTitle,
     currentAuthor,
-    
+
     // Actions
     setVideoId,
     setDefaultTrack,
@@ -105,6 +106,6 @@ export const useAudioStore = defineStore('audio', () => {
     play,
     pause,
     togglePlay,
-    clearAllData
-  }
-})
+    clearAllData,
+  };
+});

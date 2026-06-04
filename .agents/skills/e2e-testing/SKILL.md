@@ -73,7 +73,7 @@ test('thêm personal track khi đã login', async ({ page }) => {
   await page.goto('/library')
 
   await page.getByRole('button', { name: /add new track/i }).click()
-  await page.getByPlaceholder(/youtube/i).fill('https://youtu.be/jfKfPfyJRdk')
+  await page.getByPlaceholder(/youtube/i).fill('https://youtu.be/X4VbdwhkE10')
   await page.getByPlaceholder(/track name/i).fill('E2E Test Track')
   await page.getByRole('button', { name: /save/i }).click()
 

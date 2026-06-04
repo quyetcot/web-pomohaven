@@ -135,7 +135,7 @@ export const useSessionStore = defineStore('session', () => {
   const refreshAfterSession = () => {
     loadRecentSessions()
     loadWeeklyStats()
-    // allSessions không cần refresh realtime (chỉ load khi vào trang /sessions)
+    loadAllSessions()  // Cập nhật cả trang Sessions
   }
 
   return {
@@ -152,5 +152,6 @@ export const useSessionStore = defineStore('session', () => {
     // Vẫn giữ để backward compat nếu cần gọi riêng
     loadRecentSessions,
     loadWeeklyStats,
+    loadAllSessions,
   }
 })

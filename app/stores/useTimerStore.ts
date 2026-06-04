@@ -3,6 +3,7 @@ import { ref, computed, watch } from 'vue'
 import { useLocalStorage, useDocumentVisibility } from '@vueuse/core'
 import { useAudioStore } from './useAudioStore'
 import { useAuthStore } from './useAuthStore'
+import { useSessionStore } from './useSessionStore'
 import { useSupabase } from '~/composables/useSupabase'
 import { useSettingsSync } from '~/composables/useSettingsSync'
 
@@ -81,17 +82,15 @@ export const useTimerStore = defineStore('timer', () => {
     }
   }
   
-  // Keep timer synced when settings are manually changed
-  watch(() => settings.value, (newSettings, oldSettings) => {
+  // Keep timer synced when settings are manually changed (display only — DB sync via settings.vue)
+  watch(() => settings.value, (newSettings) => {
     if (!isRunning.value) {
       if (mode.value === 'focus') timeRemaining.value = newSettings.focusDuration
       else if (mode.value === 'shortBreak') timeRemaining.value = newSettings.shortBreakDuration
       else if (mode.value === 'longBreak') timeRemaining.value = newSettings.longBreakDuration
     }
-    
-    // Sync to Supabase
-    const { saveSettings } = useSettingsSync()
-    saveSettings()
+    // NOTE: saveSettings() đã bị xóa khỏi đây — tránh race condition với 3 upsert đồng thời
+    // settings.vue sẽ gọi saveSettings() tường minh sau khi user bấm Save
   }, { deep: true })
   
   // Anti-drift variables
@@ -274,12 +273,16 @@ export const useTimerStore = defineStore('timer', () => {
     }
   }
 
-  const completeSession = () => {
+  const completeSession = async () => {
     // 1. Dừng interval trước để không tick thêm
     pause()
-    // 2. Ghi session completed vào DB (sessionStartedAt sẽ bị clear trong recordSession)
-    recordSession('completed')
-    // 3. Phát alarm
+    // 2. Ghi session completed vào DB — AWAIT để đảm bảo insert xong trước khi refresh
+    await recordSession('completed')
+    // 3. Refresh Session Store SAU KHI insert xong → widgets hiển thị đúng
+    if (mode.value === 'focus') {
+      useSessionStore().refreshAfterSession()
+    }
+    // 4. Phát alarm
     triggerAlarm()
 
     if (mode.value === 'focus') {
