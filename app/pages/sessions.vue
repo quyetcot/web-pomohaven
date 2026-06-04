@@ -129,13 +129,17 @@ import { useAuthStore } from '~/stores/useAuthStore'
 const sessionStore = useSessionStore()
 const authStore = useAuthStore()
 
-onMounted(async () => {
-  // Luôn fetch fresh khi vào trang Sessions
-  // isLoaded guard chỉ dùng cho lần init — không dùng ở đây
-  if (authStore.user) {
-    await sessionStore.loadAllSessions()
-  }
-})
+// Dùng watch thay onMounted vì authStore.user có thể chưa sẵn sàng lúc mount
+// (app.vue chạy initAuthSession() async song song với mount của page này)
+watch(
+  () => authStore.user,
+  (user) => {
+    if (user) {
+      sessionStore.loadAllSessions()
+    }
+  },
+  { immediate: true }  // immediate: chạy ngay nếu user đã có sẵn
+)
 
 // ── Filter ──────────────────────────────────────────────
 type FilterKey = 'all' | 'week' | 'today'
