@@ -8,8 +8,20 @@
       </header>
     </div>
 
+    <!-- Not Logged In State -->
+    <div v-if="!authStore.user && !authStore.isInitialized" class="flex justify-center items-center py-20">
+      <div class="w-12 h-12 rounded-full border-4 border-[#272a31] border-t-[#4b8eff] animate-spin"></div>
+    </div>
+    <div v-else-if="!authStore.user" class="relative rounded-[2rem] bg-[#272a31]/60 backdrop-blur-[24px] overflow-hidden p-12 text-center">
+      <div class="absolute inset-0 border-t border-l border-[#adc6ff]/10 rounded-[2rem] pointer-events-none"></div>
+      <span class="material-symbols-outlined text-5xl text-[#4b8eff]/50 block mb-4">lock</span>
+      <h3 class="text-xl font-bold text-white mb-2">Sign in to unlock Deep Insights</h3>
+      <p class="text-sm text-[#c1c6d7] mb-6">Your session analytics are synced to the cloud and require authentication.</p>
+      <NuxtLink to="/auth" class="inline-block px-8 py-3 rounded-full bg-[#4b8eff] text-[#191c22] font-bold text-xs uppercase tracking-widest hover:shadow-[0_0_20px_rgba(75,142,255,0.4)] transition-all">Go to Login</NuxtLink>
+    </div>
+
     <!-- Loading State -->
-    <div v-if="pending" class="flex justify-center items-center py-20">
+    <div v-else-if="pending" class="flex justify-center items-center py-20">
       <div class="w-12 h-12 rounded-full border-4 border-[#272a31] border-t-[#4b8eff] animate-spin"></div>
     </div>
 
@@ -208,7 +220,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { useAuthStore } from '~/stores/useAuthStore'
 
 useHead({
@@ -216,8 +228,21 @@ useHead({
 })
 
 const authStore = useAuthStore()
-// Fetch Analytics Data
-const { data, pending, error } = await useFetch(() => authStore.user ? `/api/analytics/dashboard?userId=${authStore.user.id}` : null)
+
+// useFetch reactive theo authStore.user — tự re-fetch khi user login
+const { data, pending, error, refresh } = useFetch(
+  () => authStore.user ? `/api/analytics/dashboard?userId=${authStore.user.id}` : null,
+  { watch: false }  // tắt auto-watch, dùng manual watch bên dưới
+)
+
+// Watch auth state: khi user được set (sau initAuthSession), fetch data
+watch(
+  () => authStore.user,
+  (user) => {
+    if (user) refresh()
+  },
+  { immediate: true }
+)
 
 // Compute aggregated values
 const averageFQS = computed(() => {
