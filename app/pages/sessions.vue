@@ -129,9 +129,11 @@ import { useAuthStore } from '~/stores/useAuthStore'
 const sessionStore = useSessionStore()
 const authStore = useAuthStore()
 
-onMounted(() => {
-  if (authStore.user && !sessionStore.isLoaded) {
-    sessionStore.loadData()
+onMounted(async () => {
+  // Luôn fetch fresh khi vào trang Sessions
+  // isLoaded guard chỉ dùng cho lần init — không dùng ở đây
+  if (authStore.user) {
+    await sessionStore.loadAllSessions()
   }
 })
 

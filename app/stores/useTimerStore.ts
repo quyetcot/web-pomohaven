@@ -3,6 +3,7 @@ import { ref, computed, watch } from 'vue'
 import { useLocalStorage, useDocumentVisibility } from '@vueuse/core'
 import { useAudioStore } from './useAudioStore'
 import { useAuthStore } from './useAuthStore'
+import { useSessionStore } from './useSessionStore'
 import { useSupabase } from '~/composables/useSupabase'
 import { useSettingsSync } from '~/composables/useSettingsSync'
 
@@ -279,7 +280,11 @@ export const useTimerStore = defineStore('timer', () => {
     pause()
     // 2. Ghi session completed vào DB (sessionStartedAt sẽ bị clear trong recordSession)
     recordSession('completed')
-    // 3. Phát alarm
+    // 3. Refresh Session Store để Sessions page + Dashboard cập nhật ngay
+    if (mode.value === 'focus') {
+      useSessionStore().refreshAfterSession()
+    }
+    // 4. Phát alarm
     triggerAlarm()
 
     if (mode.value === 'focus') {
