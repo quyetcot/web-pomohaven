@@ -152,5 +152,6 @@ export const useSessionStore = defineStore('session', () => {
     // Vẫn giữ để backward compat nếu cần gọi riêng
     loadRecentSessions,
     loadWeeklyStats,
+    loadAllSessions,
   }
 })
