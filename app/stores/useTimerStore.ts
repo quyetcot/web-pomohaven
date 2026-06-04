@@ -239,7 +239,7 @@ export const useTimerStore = defineStore('timer', () => {
     }
   }
 
-  const recordSession = (status: 'completed' | 'skipped' | 'abandoned') => {
+  const recordSession = async (status: 'completed' | 'skipped' | 'abandoned') => {
     if (sessionStartedAt.value === 0) return
     const authStore = useAuthStore()
     if (!authStore.user) return
@@ -250,19 +250,28 @@ export const useTimerStore = defineStore('timer', () => {
 
     const supabase = useSupabase()
     const typeMapping: Record<TimerMode, string> = { focus: 'deep_focus', shortBreak: 'short_break', longBreak: 'long_break' }
-    
-    ;(supabase.from('pomo_sessions') as any).insert({
+
+    const payload = {
       user_id: authStore.user.id,
       type: typeMapping[mode.value],
       planned_duration: currentDuration.value,
       actual_duration: actualDuration,
       status: status,
       started_at: new Date(sessionStartedAt.value).toISOString()
-    }).then(({error}: any) => { 
-      if (error) console.error('Failed to log session:', error.message) 
-    })
-    
+    }
+
     sessionStartedAt.value = 0
+
+    const { error } = await (supabase.from('pomo_sessions') as any).insert(payload)
+    if (error) {
+      console.error('[SessionStore] recordSession FAILED:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        payload,
+      })
+    }
   }
 
   const completeSession = () => {
