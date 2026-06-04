@@ -163,9 +163,15 @@ watch(() => store.currentVideoId, (newId) => {
 })
 
 // Lắng nghe Play/Pause mượt mà (không load lại iframe)
+// Dùng stopVideo() thay pauseVideo() để ngắt buffer YouTube khi không phát
+// pauseVideo() vẫn giữ kết nối nền → tốn bandwidth không cần thiết
 watch(() => store.isPlaying, (playing) => {
   if (ytPlayer && ytPlayer.playVideo) {
-    playing ? ytPlayer.playVideo() : ytPlayer.pauseVideo()
+    if (playing) {
+      ytPlayer.playVideo()
+    } else {
+      ytPlayer.stopVideo() // Ngắt hẳn buffer, không gọi videoplayback nữa
+    }
   }
 })
 
