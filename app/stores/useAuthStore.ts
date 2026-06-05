@@ -6,6 +6,7 @@ import { useTimerStore } from './useTimerStore'
 import { useAudioStore } from './useAudioStore'
 import { useMusicStore } from './useMusicStore'
 import { useSessionStore } from './useSessionStore'
+import { useSettingsSync } from '~/composables/useSettingsSync'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
@@ -23,6 +24,10 @@ export const useAuthStore = defineStore('auth', () => {
       await ensureProfile(session.user)
       // Load session data ngay khi auth khởi tạo xong — DUY NHẤT lần này
       useSessionStore().loadData()
+      // Load settings + personal tracks từ DB (user đã login sẵn, e.g. sau F5)
+      const { loadSettings } = useSettingsSync()
+      loadSettings()
+      useMusicStore().loadPersonalTracks()
     }
     
     // Listen for auth state changes globally
@@ -32,6 +37,11 @@ export const useAuthStore = defineStore('auth', () => {
         await ensureProfile(session.user)
         // Khi sign-in (OAuth callback), force reload vì user mới
         useSessionStore().loadData(true)
+        // Load settings + personal tracks ngay sau khi SIGNED_IN (OAuth redirect)
+        // Đây là điểm duy nhất đảm bảo authStore.user đã được set trước khi load
+        const { loadSettings } = useSettingsSync()
+        await loadSettings()
+        useMusicStore().loadPersonalTracks()
       }
       if (_event === 'SIGNED_OUT') {
         // Reset guard để lần đăng nhập sau load fresh
