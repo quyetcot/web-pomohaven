@@ -26,6 +26,7 @@ export const useTimerStore = defineStore('timer', () => {
 
   // State
   const audioStore = useAudioStore()
+  const supabase = useSupabase()
   const mode = ref<TimerMode>('focus')
   const isRunning = ref(false)
   const timeRemaining = ref(settings.value.focusDuration)
@@ -39,7 +40,6 @@ export const useTimerStore = defineStore('timer', () => {
     const authStore = useAuthStore()
     if (!authStore.user) return
 
-    const supabase = useSupabase()
     const todayStr = new Date().toISOString().split('T')[0]
     
     // Using gte started_at today
@@ -207,6 +207,9 @@ export const useTimerStore = defineStore('timer', () => {
 
   // setMode(): chuyển chế độ timer mà KHÔNG ghi thêm session nào vào DB
   const setMode = (newMode: TimerMode) => {
+    if (sessionStartedAt.value > 0) {
+      recordSession('abandoned')
+    }
     mode.value = newMode
     resetTimer()
   }
@@ -245,9 +248,11 @@ export const useTimerStore = defineStore('timer', () => {
 
     const actualDuration = currentDuration.value - timeRemaining.value
     // If abandoned before 10 seconds of work, ignore this to avoid DB spam
-    if (status !== 'completed' && actualDuration < 10) return
+    if (status !== 'completed' && actualDuration < 10) {
+      sessionStartedAt.value = 0
+      return
+    }
 
-    const supabase = useSupabase()
     const typeMapping: Record<TimerMode, string> = { focus: 'deep_focus', shortBreak: 'short_break', longBreak: 'long_break' }
 
     const payload = {
