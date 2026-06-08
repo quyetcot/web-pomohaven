@@ -33,6 +33,7 @@ export const useTimerStore = defineStore('timer', () => {
   const todayCompletedCount = ref(0) // New: Persisted cross-session via DB
   const lastBeepedSecond = ref(-1) // To prevent duplicate beeps in one second
   const sessionStartedAt = ref(0)
+  const isCompleting = ref(false) // Guard: chống gọi completeSession() 2 lần khi interval chưa kịp clear
 
   // Fetch true daily completed count on mount
   const fetchTodayCompleted = async () => {
@@ -138,6 +139,7 @@ export const useTimerStore = defineStore('timer', () => {
   // Actions
   const tick = () => {
     if (!isRunning.value) return
+    if (isCompleting.value) return // Guard: đang xử lý completion, bỏ qua tick
     const now = Date.now()
     const newRemaining = Math.max(0, Math.ceil((expectedEndTime - now) / 1000))
     timeRemaining.value = newRemaining
@@ -238,13 +240,23 @@ export const useTimerStore = defineStore('timer', () => {
     }
   }
 
-  const recordSession = async (status: 'completed' | 'skipped' | 'abandoned') => {
-    if (sessionStartedAt.value === 0) return
+  // recordSession nhận snapshot tại thời điểm session kết thúc
+  // vì khi chạy background, mode/duration đã có thể thay đổi
+  const recordSession = async (
+    status: 'completed' | 'skipped' | 'abandoned',
+    snapshot?: { modeAtEnd: TimerMode; plannedDuration: number; actualDuration: number; startedAt: number }
+  ) => {
+    const startedAt = snapshot?.startedAt ?? sessionStartedAt.value
+    if (startedAt === 0) return
+
     const authStore = useAuthStore()
     if (!authStore.user) return
 
-    const actualDuration = currentDuration.value - timeRemaining.value
-    // If abandoned before 10 seconds of work, ignore this to avoid DB spam
+    const modeAtEnd = snapshot?.modeAtEnd ?? mode.value
+    const plannedDuration = snapshot?.plannedDuration ?? currentDuration.value
+    const actualDuration = snapshot?.actualDuration ?? (plannedDuration - timeRemaining.value)
+
+    // If abandoned before 10 seconds of work, ignore to avoid DB spam
     if (status !== 'completed' && actualDuration < 10) return
 
     const supabase = useSupabase()
@@ -252,14 +264,12 @@ export const useTimerStore = defineStore('timer', () => {
 
     const payload = {
       user_id: authStore.user.id,
-      type: typeMapping[mode.value],
-      planned_duration: currentDuration.value,
+      type: typeMapping[modeAtEnd],
+      planned_duration: plannedDuration,
       actual_duration: actualDuration,
       status: status,
-      started_at: new Date(sessionStartedAt.value).toISOString()
+      started_at: new Date(startedAt).toISOString()
     }
-
-    sessionStartedAt.value = 0
 
     const { error } = await (supabase.from('pomo_sessions') as any).insert(payload)
     if (error) {
@@ -273,27 +283,48 @@ export const useTimerStore = defineStore('timer', () => {
     }
   }
 
-  const completeSession = async () => {
-    // 1. Dừng interval trước để không tick thêm
+  const completeSession = () => {
+    // Guard: chống gọi lại trong khi đang xử lý
+    if (isCompleting.value) return
+    isCompleting.value = true
+
+    // Capture snapshot NGAY TẠI ĐÂY trước khi bất kỳ thứ gì thay đổi
+    const completedMode = mode.value
+    const plannedDuration = currentDuration.value
+    const actualDuration = plannedDuration - timeRemaining.value
+    const startedAt = sessionStartedAt.value
+    sessionStartedAt.value = 0 // Clear ngay để tránh double-record
+
+    // 1. Dừng interval ngay lập tức
     pause()
-    // 2. Ghi session completed vào DB — AWAIT để đảm bảo insert xong trước khi refresh
-    await recordSession('completed')
-    // 3. Refresh Session Store SAU KHI insert xong → widgets hiển thị đúng
-    if (mode.value === 'focus') {
-      useSessionStore().refreshAfterSession()
-    }
-    // 4. Phát alarm
+
+    // 2. Phát alarm
     triggerAlarm()
 
-    if (mode.value === 'focus') {
+    // 3. Chuyển mode NGAY — KHÔNG chờ DB, UI không được block bởi network
+    if (completedMode === 'focus') {
       sessionsCompleted.value++
-      todayCompletedCount.value++ // Instantly reflect in Sidebar UI
+      todayCompletedCount.value++
       const nextMode: TimerMode = sessionsCompleted.value % settings.value.sessionsBeforeLongBreak === 0 ? 'longBreak' : 'shortBreak'
       setMode(nextMode)
       if (settings.value.autoStartBreaks) start()
     } else {
       setMode('focus')
       if (settings.value.autoStartPomodoros) start()
+    }
+
+    // Release guard NGAY sau khi transition xong (synchronous)
+    isCompleting.value = false
+
+    // 4. Lưu DB ở background với snapshot đã capture — fire-and-forget
+    if (startedAt !== 0) {
+      recordSession('completed', { modeAtEnd: completedMode, plannedDuration, actualDuration, startedAt })
+        .then(() => {
+          if (completedMode === 'focus') {
+            useSessionStore().refreshAfterSession()
+          }
+        })
+        .catch(err => console.error('[completeSession] Background DB save failed:', err))
     }
   }
 
