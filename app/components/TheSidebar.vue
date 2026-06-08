@@ -1,5 +1,5 @@
 <template>
-  <aside class="hidden md:flex fixed left-0 h-full w-64 bg-surface/60 backdrop-blur-2xl flex-col py-8 gap-6 border-r border-primary-glow/15 z-40 pt-24">
+  <aside class="hidden md:flex fixed left-0 h-full w-64 bg-surface/60 backdrop-blur-2xl flex-col py-8 gap-6 border-r border-primary-glow/15 z-40 pt-24 overflow-y-auto no-scrollbar">
     <div class="px-8 mb-4">
       <div class="text-xl font-bold text-primary">PomoHaven</div>
       <div class="text-[0.6875rem] uppercase tracking-widest text-muted opacity-70">The Deep Focus Sanctuary</div>
@@ -140,3 +140,15 @@ const handleLogout = async () => {
   }
 }
 </script>
+
+<style scoped>
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+</style>
