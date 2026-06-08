@@ -8,7 +8,6 @@
 <script setup lang="ts">
 import { onMounted, computed } from 'vue'
 import { useAuthStore } from '~/stores/useAuthStore'
-import { useMusicStore } from '~/stores/useMusicStore'
 import { useTimerStore } from '~/stores/useTimerStore'
 
 const authStore = useAuthStore()
@@ -34,15 +33,9 @@ useHead({
 })
 
 onMounted(async () => {
+  // initAuthSession() đảm nhận việc load settings + personal tracks
+  // sau khi xác nhận auth state (getSession hoặc SIGNED_IN)
   await authStore.initAuthSession()
-  
-  // Sync Settings
-  const { loadSettings } = useSettingsSync()
-  loadSettings()
-
-  // Sync Music
-  const musicStore = useMusicStore()
-  musicStore.loadPersonalTracks()
 })
 
 useSeoMeta({
