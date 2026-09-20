@@ -17,7 +17,7 @@ export const useMusicStore = defineStore("music", () => {
   // Default Curated Library
   const defaultLibrary: Track[] = [
     {
-      id: "X4VbdwhkE10",
+      id: "lTRiuFIWV54",
       name: "Lofi Beats",
       title: "lofi hip hop radio - beats to relax/study to",
       author: "Lofi Girl",
@@ -171,7 +171,7 @@ export const useMusicStore = defineStore("music", () => {
   const getFeaturedTracks = () => {
     // Mix of 4 curated + any personal
     const featuredCurated = [
-      "X4VbdwhkE10",
+      "lTRiuFIWV54",
       "Qo4JIT8jMtI",
       "kXUnJ61KxRE",
       "zr5JjgOMXeQ",
