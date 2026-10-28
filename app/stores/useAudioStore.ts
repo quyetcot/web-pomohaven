@@ -5,7 +5,7 @@ import { useLocalStorage } from "@vueuse/core";
 export const useAudioStore = defineStore("audio", () => {
   // Persisted settings
   const settings = useLocalStorage("pomohaven_audio_v1", {
-    defaultVideoId: "lTRiuFIWV54", // Lofi Girl fallback
+    defaultVideoId: "JZ7Tw-FfopI", // Lofi Girl fallback
     defaultVolume: 100,
     autoPlayFocus: false,
     autoPauseBreak: false,
@@ -83,9 +83,9 @@ export const useAudioStore = defineStore("audio", () => {
 
   const clearAllData = () => {
     pause();
-    settings.value.defaultVideoId = "lTRiuFIWV54";
+    settings.value.defaultVideoId = "JZ7Tw-FfopI";
     settings.value.defaultVolume = 100;
-    currentVideoId.value = "lTRiuFIWV54";
+    currentVideoId.value = "JZ7Tw-FfopI";
   };
 
   return {
